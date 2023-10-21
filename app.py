@@ -1,23 +1,13 @@
-
-from flask import Flask, render_template
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
-@app.route('/stock-selection')
-def stock_selection():
-    return render_template('stock_selection.html')
-
-@app.route('/portfolio-optimization')
-def portfolio_optimization():
-    return render_template('portfolio_optimization.html')
-
-@app.route('/report-generation')
-def report_generation():
-    return render_template('report_generation.html')
+    # Instead of rendering an HTML template, you return JSON data.
+    # For demonstration purposes, I'm just returning a simple message. 
+    # In real-world scenarios, you might return relevant data.
+    return jsonify({"message": "Welcome to OptiFolio API!"})
 
 if __name__ == '__main__':
     app.run(debug=True)
