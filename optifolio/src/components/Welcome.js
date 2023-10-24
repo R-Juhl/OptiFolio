@@ -1,15 +1,17 @@
 // Welcome.js
 import React, { useState } from 'react';
+import logo from '../images/logo.svg';
 
-function Welcome() {
+function Welcome(props) {
   const [capital, setCapital] = useState('');
   const [risk, setRisk] = useState(5);
   const [experience, setExperience] = useState('');
 
   return (
     <div className="App">
-      <h2>Welcome to OptiFolio</h2>
-      <p>Optimize your portfolio based on your preferences and risk tolerance.</p>
+      <h2 className="title">Welcome to OptiFolio</h2>
+      <img src={logo} className="App-logo" alt="logo" />
+      <p>Your go-to solution for creating a stock portfolio</p>
       
       <label htmlFor="capital">Total Capital:</label>
       <input 
@@ -62,7 +64,10 @@ function Welcome() {
       />
       <label htmlFor="expert">Expert</label><br/>
 
-      <button id="getStarted">Get Started</button>
+      <button onClick={props.onGetStartedClick}>
+        Get Started
+      </button>
+
     </div>
   );
 }

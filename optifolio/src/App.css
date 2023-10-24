@@ -9,7 +9,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    animation: App-logo-spin infinite 50s linear;
   }
 }
 
@@ -24,6 +24,13 @@
   color: white;
 }
 
+body {
+  background-color: #2D2D2D;
+  color: #EDEDED;
+  font-family: 'Montserrat', sans-serif;
+}
+
+
 .App-link {
   color: #61dafb;
 }
@@ -35,4 +42,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('./fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Montserrat Bold';
+  src: url('./fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+.title {
+  font-family: 'Montserrat Bold', sans-serif;
 }

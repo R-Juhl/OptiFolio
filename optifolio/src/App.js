@@ -1,12 +1,20 @@
 // App.js
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import Welcome from './welcome';
+import Welcome from './components/Welcome';
+import StockSelect from './components/StockSelect';
 
 function App() {
+  const [showStockSelect, setShowStockSelect] = useState(false);
+
+  const handleGetStartedClick = () => {
+    setShowStockSelect(true);
+  };
+
   return (
     <div className="App">
-      <Welcome />
+      <Welcome onGetStartedClick={handleGetStartedClick} />
+      {showStockSelect && <StockSelect />}
     </div>
   );
 }
