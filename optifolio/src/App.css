@@ -96,11 +96,13 @@ input {
   color: white;
 }
 
-/* Stock Legend Style */
-.legend {
+/* Stock Output Container Styles */
+
+.portfolio-container {
   display: flex;
-  flex-direction: column;
-  margin-left: 20px;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
 }
 
 .legend-item {
@@ -115,13 +117,15 @@ input {
   margin-right: 5px;
 }
 
-/* To center legend besides pie chart */
-
-.pie-container {
+.chart-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin: -50px 0;
+  gap: 0px;
+}
+
+.recharts-legend-item {
+  margin-bottom: 2px;
 }
 
 /* ======================
