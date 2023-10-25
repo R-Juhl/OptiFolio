@@ -1,21 +1,19 @@
+/* ======================
+   GLOBAL STYLES 
+   ====================== */
+
+body {
+  background-color: #2D2D2D;
+  color: #EDEDED;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ======================
+   APP SPECIFIC STYLES 
+   ====================== */
+
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 20vmin;
-  pointer-events: none;
-}
-
-@keyframes App-logo-spin {
-  0%, 100% { transform: rotate(5deg); }
-  50% { transform: rotate(35deg); }
-  100% { transform: rotate(5deg); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-      animation: App-logo-spin 5s ease-in-out infinite;
-  }
 }
 
 .App-header {
@@ -29,39 +27,20 @@
   color: white;
 }
 
-body {
-  background-color: #2D2D2D;
-  color: #EDEDED;
-  font-family: 'Montserrat', sans-serif;
-}
-
 .App-link {
   color: #61dafb;
 }
 
-@font-face {
-  font-family: 'Montserrat';
-  src: url('./fonts/Montserrat-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Bold';
-  src: url('./fonts/Montserrat-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'ExtraBold';
-  src: url('./fonts/Montserrat-ExtraBold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
+.App-logo {
+  height: 20vmin;
+  pointer-events: none;
 }
 
 .title {
   font-family: 'ExtraBold', sans-serif;
 }
 
+/* Main Elements */
 button {
   background-color: #EDEDED;
   border: none;
@@ -87,4 +66,98 @@ input {
   color: #2D2D2D;
   transition: background-color 0.3s;
   font-family: 'Bold', sans-serif;
+}
+
+/* Stock Selection */
+.stock-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.stock-box {
+  background-color: #EDEDED;
+  color: #2D2D2D;
+  padding: 15px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  font-family: 'Bold', sans-serif;
+}
+
+.stock-box:hover {
+  transform: scale(1.1);
+}
+
+.stock-box.selected {
+  background-color: #ffb560;
+  color: white;
+}
+
+/* Stock Legend Style */
+.legend {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.color-box {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+}
+
+/* To center legend besides pie chart */
+
+.pie-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -50px 0;
+}
+
+/* ======================
+   ANIMATIONS 
+   ====================== */
+
+@keyframes App-logo-spin {
+  0%, 100% { transform: rotate(5deg); }
+  50% { transform: rotate(35deg); }
+  100% { transform: rotate(5deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+      animation: App-logo-spin 5s ease-in-out infinite;
+  }
+}
+
+/* ======================
+   FONT-FACE DEFINITIONS 
+   ====================== */
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('./fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Bold';
+  src: url('./fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ExtraBold';
+  src: url('./fonts/Montserrat-ExtraBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
