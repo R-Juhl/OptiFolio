@@ -1,5 +1,4 @@
-// StockSelect.js
-import React, { useState } from 'react';
+import React from 'react';
 
 function StockSelect() {
 
@@ -8,7 +7,7 @@ function StockSelect() {
       <h2>Select Stocks</h2>
       <p>Based on your interest or current portfolio, select stocks below for portfolio optimization:</p>
 
-      <button id="getStarted">Get Started</button>
+      <button id="getStarted">CREATE MY PORTFOLIO ALREADY!</button>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-// Welcome.js
 import React, { useState } from 'react';
 import logo from '../images/logo.svg';
 
@@ -9,11 +8,12 @@ function Welcome(props) {
 
   return (
     <div className="App">
+
       <h2 className="title">Welcome to OptiFolio</h2>
       <img src={logo} className="App-logo" alt="logo" />
       <p>Your go-to solution for creating a stock portfolio</p>
       
-      <label htmlFor="capital">Total Capital:</label>
+      <br/><label htmlFor="capital">Total Capital (USD): </label>
       <input 
         type="number" 
         id="capital" 
@@ -23,7 +23,7 @@ function Welcome(props) {
         onChange={e => setCapital(e.target.value)}
       />
 
-      <label htmlFor="risk">Risk Level:</label>
+      <br/><label htmlFor="risk">Risk Level: </label>
       <input 
         type="range" 
         id="risk" 
@@ -35,7 +35,7 @@ function Welcome(props) {
       />
       <span id="riskDisplay">{risk}</span>
 
-      <h3>Select your experience level:</h3>
+      <br/><br/><h3>Select your experience level:</h3>
       <input 
         type="radio" 
         id="beginner" 
@@ -62,10 +62,10 @@ function Welcome(props) {
         checked={experience === 'expert'}
         onChange={e => setExperience(e.target.value)}
       />
-      <label htmlFor="expert">Expert</label><br/>
+      <label htmlFor="expert">Expert</label><br/><br/>
 
-      <button onClick={props.onGetStartedClick}>
-        Get Started
+      <br/><button onClick={props.onGetStartedClick}>
+        GET STARTED
       </button>
 
     </div>

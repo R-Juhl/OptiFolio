@@ -3,13 +3,18 @@
 }
 
 .App-logo {
-  height: 40vmin;
+  height: 20vmin;
   pointer-events: none;
 }
 
+@keyframes App-logo-spin {
+  0%, 100% { transform: rotate(5deg); }
+  50% { transform: rotate(35deg); }
+  100% { transform: rotate(5deg); }
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 50s linear;
+      animation: App-logo-spin 5s ease-in-out infinite;
   }
 }
 
@@ -30,20 +35,9 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
-
 .App-link {
   color: #61dafb;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 
 @font-face {
   font-family: 'Montserrat';
@@ -51,15 +45,46 @@ body {
   font-weight: 400;
   font-style: normal;
 }
-
-
 @font-face {
-  font-family: 'Montserrat Bold';
+  font-family: 'Bold';
   src: url('./fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ExtraBold';
+  src: url('./fonts/Montserrat-ExtraBold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
 
 .title {
-  font-family: 'Montserrat Bold', sans-serif;
+  font-family: 'ExtraBold', sans-serif;
+}
+
+button {
+  background-color: #EDEDED;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: #2D2D2D;
+  transition: background-color 0.3s;
+  font-family: 'Bold', sans-serif;
+}
+
+button:hover {
+  background-color: #ffb560;
+}
+button:focus {
+  outline: none;
+}
+
+input {
+  background-color: #EDEDED;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #2D2D2D;
+  transition: background-color 0.3s;
+  font-family: 'Bold', sans-serif;
 }
