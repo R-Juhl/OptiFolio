@@ -19,7 +19,7 @@ def fetch_stock_data(stocks):
 def compute_portfolio_metrics(data):
     returns = data.pct_change().dropna()
     expected_returns = returns.mean() * 252
-    covariance_matrix = returns.cov()
+    covariance_matrix = returns.cov() * 252
     correlation_matrix = returns.corr()
     return expected_returns, covariance_matrix, correlation_matrix
 

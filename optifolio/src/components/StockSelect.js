@@ -8,7 +8,8 @@ function StockSelect() {
   const [tangencyPortfolio, setTangencyPortfolio] = useState(null);
   const [individualStocks, setIndividualStocks] = useState([]);
   const [minVariancePortfolio, setMinVariancePortfolio] = useState(null);
-  const [hasComputed, setHasComputed] = useState(false);
+  const [hasClickedButton, setHasClickedButton] = useState(false);
+  const [controller, setController] = useState(new AbortController()); // AbortController for fetch
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -22,40 +23,69 @@ function StockSelect() {
     }
   }
 
-  const computeOptimalPortfolio = async () => {
+  const computeOptimalPortfolio = async (currentController) => {
+    // Reset weights to null every time before computing
+    setPortfolioWeights(null);
+    
     if (selectedStocks.length === 0) {
-      setPortfolioWeights(null);
       return;
     }
 
-    setHasComputed(true);
-    const response = await fetch('http://localhost:5000/api/compute-portfolio', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ stocks: selectedStocks })
-    });
+    try {
+      const response = await fetch('http://localhost:5000/api/compute-portfolio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ stocks: selectedStocks }),
+        signal: currentController.signal // Use the passed controller
+      });
 
-    const data = await response.json();
-    console.log(data);
-    setPortfolioWeights(data.weights);
-    setEfficientFrontier(data.frontier);
-    setTangencyPortfolio(data.tangency);
-    setIndividualStocks(data.stocks);
-    setMinVariancePortfolio(data.min_variance);
-
+      const data = await response.json();
+      console.log(data);
+      setPortfolioWeights(data.weights);
+      setEfficientFrontier(data.frontier);
+      setTangencyPortfolio(data.tangency);
+      setIndividualStocks(data.stocks);
+      setMinVariancePortfolio(data.min_variance);
+      setHasClickedButton(true);
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Fetch aborted');
+      } else {
+        throw error;
+      }
+    }
   }
 
   useEffect(() => {
-    if (hasComputed) {
-      // Reset weights to null every time stock selection changes
-      setPortfolioWeights(null);
-      
-      // Compute the optimal portfolio
-      computeOptimalPortfolio();
+    console.log("useEffect triggered");
+    
+      // Only compute the portfolio if the button has been clicked at least once
+      if (hasClickedButton) {
+        if (selectedStocks.length > 0) {
+          // If there's an existing controller, abort the previous fetch
+          if (controller) {
+            controller.abort();
+        }
+
+        // Create a new AbortController for the fetch
+        const newController = new AbortController();
+        setController(newController);
+
+        // Compute the optimal portfolio with the new controller
+        computeOptimalPortfolio(newController);
+      } else {
+        // Reset all states if no stocks are selected
+        setPortfolioWeights(null);
+        setEfficientFrontier([]);
+        setTangencyPortfolio(null);
+        setIndividualStocks([]);
+        setMinVariancePortfolio(null);
+      }
     }
   }, [selectedStocks]);
+  
 
   return (
     <div className="App">
@@ -74,7 +104,9 @@ function StockSelect() {
         ))}
       </div>
 
-      <button id="getStarted" onClick={computeOptimalPortfolio}>CREATE MY PORTFOLIO ALREADY!</button>
+      <button id="getStarted" onClick={computeOptimalPortfolio}>
+        CREATE MY PORTFOLIO ALREADY!
+      </button>
 
       {
         portfolioWeights && portfolioWeights.length === selectedStocks.length && (
@@ -92,7 +124,7 @@ function StockSelect() {
                   dataKey={entry => entry.volatility * Math.sqrt(252)}
                   name="Volatility"
                   unit="%"
-                  tickFormatter={(value) => value.toFixed(2)}
+                  tickFormatter={(value) => value.toFixed(1)}
                   label={{ value: 'Volatility', position: 'bottom' }} 
                 />
                 <YAxis 
