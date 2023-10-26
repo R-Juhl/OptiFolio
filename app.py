@@ -12,8 +12,9 @@ CORS(app)
 def index():
     return jsonify({"message": "Welcome to OptiFolio API!"})
 
-def fetch_stock_data(stocks):
-    data = yf.download(stocks, start="2015-01-01", end="2023-01-01")['Adj Close']
+def fetch_stock_data(stocks, start_date, end_date):
+    # data = yf.download(stocks, start="2015-01-01", end="2023-01-01")['Adj Close']
+    data = yf.download(stocks, start=start_date, end=end_date)['Adj Close']
     return data
 
 def compute_portfolio_metrics(data):
@@ -49,10 +50,12 @@ def portfolio_performance(weights, expected_returns, covariance_matrix):
 @app.route('/api/compute-portfolio', methods=['POST'])
 def compute_portfolio():
     stocks = request.json['stocks']
+    start_date = request.json['startDate']
+    end_date = request.json['endDate']
     if len(stocks) == 1:
         return jsonify({"weights": [1.0], "frontier": []})
 
-    data = fetch_stock_data(stocks)
+    data = fetch_stock_data(stocks, start_date, end_date)
     expected_returns, covariance_matrix, _ = compute_portfolio_metrics(data)
     
     min_return = min(expected_returns)

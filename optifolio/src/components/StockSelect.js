@@ -10,6 +10,8 @@ function StockSelect() {
   const [minVariancePortfolio, setMinVariancePortfolio] = useState(null);
   const [hasClickedButton, setHasClickedButton] = useState(false);
   const [controller, setController] = useState(new AbortController()); // AbortController for fetch
+  const [startDate, setStartDate] = useState("2015-01");
+  const [endDate, setEndDate] = useState("2023-01");
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -37,7 +39,11 @@ function StockSelect() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ stocks: selectedStocks }),
+        body: JSON.stringify({ 
+          stocks: selectedStocks,
+          startDate: startDate + "-01",  // Format to YYYY-MM-DD
+          endDate: endDate + "-01"
+        }),
         signal: currentController.signal // Use the passed controller
       });
 
@@ -84,7 +90,7 @@ function StockSelect() {
         setMinVariancePortfolio(null);
       }
     }
-  }, [selectedStocks]);
+  }, [selectedStocks, startDate, endDate]);
   
 
   return (
@@ -102,6 +108,21 @@ function StockSelect() {
             {stock}
           </div>
         ))}
+      </div>
+
+      <div className="date-container">
+        <p>Choose date range for historical data:</p>
+        <input 
+          type="month"
+          value={startDate}
+          onChange={e => setStartDate(e.target.value)}
+        />
+        to
+        <input 
+          type="month"
+          value={endDate}
+          onChange={e => setEndDate(e.target.value)}
+        />
       </div>
 
       <button id="getStarted" onClick={computeOptimalPortfolio}>

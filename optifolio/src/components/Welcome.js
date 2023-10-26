@@ -4,7 +4,7 @@ import logo from '../images/logo.svg';
 function Welcome(props) {
   const [capital, setCapital] = useState('');
   const [risk, setRisk] = useState(5);
-  const [experience, setExperience] = useState('');
+  //const [experience, setExperience] = useState('');
 
   return (
     <div className="App">
@@ -21,7 +21,7 @@ function Welcome(props) {
         placeholder="Enter your total capital"
         value={capital}
         onChange={e => setCapital(e.target.value)}
-      />
+      /><br/>
 
       <br/><label htmlFor="risk">Risk Level: </label>
       <input 
@@ -33,8 +33,9 @@ function Welcome(props) {
         value={risk}
         onChange={e => setRisk(e.target.value)}
       />
-      <span id="riskDisplay">{risk}</span>
-
+      <span id="riskDisplay">{risk}</span><br/>
+      
+      {/*
       <br/><br/><h3>Select your experience level:</h3>
       <input 
         type="radio" 
@@ -63,6 +64,7 @@ function Welcome(props) {
         onChange={e => setExperience(e.target.value)}
       />
       <label htmlFor="expert">Expert</label><br/><br/>
+      */}
 
       <br/><button onClick={props.onGetStartedClick}>
         GET STARTED
