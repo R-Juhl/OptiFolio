@@ -125,7 +125,7 @@ function StockSelect() {
         />
       </div>
 
-      <button id="getStarted" onClick={computeOptimalPortfolio}>
+      <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
         CREATE MY PORTFOLIO ALREADY!
       </button>
 

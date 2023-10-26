@@ -4,15 +4,26 @@ import logo from '../images/logo.svg';
 function Welcome(props) {
   const [capital, setCapital] = useState('');
   const [risk, setRisk] = useState(5);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   //const [experience, setExperience] = useState('');
 
   return (
     <div className="App">
-
       <h2 className="title">Welcome to OptiFolio</h2>
       <img src={logo} className="App-logo" alt="logo" />
       <p>Your go-to solution for creating a stock portfolio</p>
       
+      <button className="disclaimer-button" onClick={() => setShowDisclaimer(true)}>
+        NFA: Read Disclaimer
+      </button>
+
+      {showDisclaimer && (
+        <div className="disclaimer-popup">
+          <button className="close-button" onClick={() => setShowDisclaimer(false)}>X</button>
+          <p>Nothing in this application is financial advice. Always conduct your own research and/or consult with a financial advisor before making any investment decisions.</p>
+        </div>
+      )}
+
       <br/><label htmlFor="capital">Total Capital (USD): </label>
       <input 
         type="number" 
@@ -33,7 +44,7 @@ function Welcome(props) {
         value={risk}
         onChange={e => setRisk(e.target.value)}
       />
-      <span id="riskDisplay">{risk}</span><br/>
+      <span id="riskDisplay">{risk}</span><br/><br/>
       
       {/*
       <br/><br/><h3>Select your experience level:</h3>
@@ -66,7 +77,7 @@ function Welcome(props) {
       <label htmlFor="expert">Expert</label><br/><br/>
       */}
 
-      <br/><button onClick={props.onGetStartedClick}>
+      <button className="main-button" onClick={props.onGetStartedClick}>
         GET STARTED
       </button>
 

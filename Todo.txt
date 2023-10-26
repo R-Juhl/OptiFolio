@@ -1,10 +1,7 @@
 Todo:
 
-Add some cool sounding (chat gpt generated) disclaimer saying this is NFA and in reality people should not built their portfolio exactly like this
+Revisit disclaimer text: Add some cool sounding (chat gpt generated) disclaimer saying this is NFA and in reality people should not built their portfolio exactly like this
 Though it does provide inspiration and important insights. Also valuable to evaluate one's current portfolio
-Add subtle "NFA: Read Disclaimer" text/button that generates popup with this text if possible
-
-
 
 Table with individual stocks expected returns and volatility below pie chart.
 Then some cool way to illustrate the expected return and volatility of the optimal (later the user-chosen) portfolio
@@ -12,6 +9,9 @@ Then some cool way to illustrate the expected return and volatility of the optim
 If possible, add slight zoom hover effect on mouse over legends and pie chart
 
 Add shorting option
+
+Add handling of when user-specified date range does not include historical data of one or more stocks (pre-ipo)
+*output message to user saying this
 
 Add custom stock selection system from yfinance library - some cool design
 
@@ -23,7 +23,7 @@ Use share counts after rounding to recalibrate target shares - will likely requi
 Add RRA levels into the app using the risk-slider
 User will be able to chose portfolios from the frontier depending on their chosen risk aversian (RRA) level
 *Make sure that current points on the frontier match with these RRA levels. Same number of points. When risk level changes the frontier updates automatically
-Move risk level down to stock selection and consider deleting experience level funct.
+Move risk level down to stock selection (or below frontier perhaps?) and consider deleting experience level funct.
 
 Add budgeting functionality.
 Monthly budget to invest in stocks
@@ -38,3 +38,7 @@ Add more stock selection options/inspo and incorporate GPT api calls into this b
 Will be a challenge to get right output of ChatGPT (with great detailed prompt) to return available stocks and tickers, and how to convert these into possible user selections
 
 Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
+
+
+Notes/bugs and more:
+Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates

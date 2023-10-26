@@ -51,7 +51,7 @@ button {
   font-family: 'Bold', sans-serif;
 }
 
-button:hover {
+.main-button:hover {
   background-color: #ffb560;
 }
 button:focus {
@@ -66,6 +66,49 @@ input {
   color: #2D2D2D;
   transition: background-color 0.3s;
   font-family: 'Bold', sans-serif;
+}
+
+/* Disclaimer Popup Styles */
+.disclaimer-button {
+  background: none;
+  border: none;
+  color: #EDEDED;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+.disclaimer-button:hover {
+  color: #ffb560;
+}
+
+.disclaimer-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(150%, -90%);
+  background-color: #EDEDED;
+  color: #2D2D2D;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 300px;
+  z-index: 10;  /* Ensure it's on top */
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #2D2D2D;
+  position: left;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: #ffb560;
 }
 
 /* Stock Selection */
