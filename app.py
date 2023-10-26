@@ -90,5 +90,18 @@ def compute_portfolio():
         "min_variance": min_variance_portfolio
     })
 
+@app.route('/api/validate-stock', methods=['POST'])
+def validate_stock():
+    stock = request.json['stock']
+    try:
+        # Try fetching data for the last 7 days as validity check (because shortName did not work for some reason)
+        data = yf.download(stock, period="7d")
+        if data.empty:
+            raise ValueError(f"No data available for {stock}")
+        return jsonify({"valid": True, "message": f"{stock} is a valid stock."})
+    except Exception as e:
+        print(f"Error validating stock {stock}: {e}")
+        return jsonify({"valid": False, "message": f"{stock} is not a valid stock."})
+
 if __name__ == '__main__':
     app.run(debug=True)

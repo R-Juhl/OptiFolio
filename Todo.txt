@@ -1,15 +1,12 @@
 Todo:
 
-Then some cool way to illustrate the expected return and volatility of the optimal (later the user-chosen) portfolio
-
-If possible, add slight zoom hover effect on mouse over legends and pie chart
-
 Add shorting option
+How to modify pie chart illustration??
 
 Add handling of when user-specified date range does not include historical data of one or more stocks (pre-ipo)
 *output message to user saying this
 
-Add custom stock selection system from yfinance library - some cool design
+Do not display efficient frontier plot when only 1 stock selected (not relevant)
 
 Add capital and convert optimal portfolio weights into target number of shares (rounded down)
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.

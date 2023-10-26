@@ -12,6 +12,9 @@ function StockSelect() {
   const [controller, setController] = useState(new AbortController()); // AbortController for fetch
   const [startDate, setStartDate] = useState("2015-01");
   const [endDate, setEndDate] = useState("2023-01");
+  const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
+  const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
+  const [errorMessage, setErrorMessage] = useState('');
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -61,6 +64,32 @@ function StockSelect() {
       } else {
         throw error;
       }
+    }
+  }
+
+  const addStock = async () => {
+    try {
+        const response = await fetch('http://localhost:5000/api/validate-stock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ stock: newStock })
+        });
+
+        const data = await response.json();
+
+        if (data.valid) {
+            setAvailableStocks(prevStocks => [...prevStocks, newStock]);
+            console.log(availableStocks);
+            setNewStock('');
+            setErrorMessage('');  // Clear any previous error messages
+        } else {
+            console.error(data.message);
+            setErrorMessage(data.message); // User facing error messaging
+        }
+    } catch (error) {
+        // console.error("Error adding stock:", error);
     }
   }
 
@@ -125,18 +154,29 @@ function StockSelect() {
 
   return (
     <div className="App">
+      <br/>
+      <hr className="custom-hr" />
       <h2>Select Stocks</h2>
-      <p>Based on your interest or current portfolio, select stocks below for portfolio optimization:</p>
+      <p>Type a stock ticker and add to available stocks:</p>
+      <input 
+        type="text" 
+        value={newStock}
+        onChange={e => setNewStock(e.target.value.toUpperCase())}
+        placeholder="Enter stock ticker..."
+      />
+      <button id="addStock" className="main-button" onClick={addStock}>Add</button>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
+      <p>Select and deselect any stock to create new optimal portfolios:</p>
       <div className="stock-container">
-        {['TSLA', 'META', 'AAPL', 'AMZN'].map(stock => (
-          <div 
-            key={stock}
-            className={`stock-box ${selectedStocks.includes(stock) ? 'selected' : ''}`}
-            onClick={() => toggleStockSelection(stock)}
-          >
-            {stock}
-          </div>
+        {availableStocks.map(stock => (
+            <div 
+              key={stock}
+              className={`stock-box ${selectedStocks.includes(stock) ? 'selected' : ''}`}
+              onClick={() => toggleStockSelection(stock)}
+            >
+              {stock}
+            </div>
         ))}
       </div>
 

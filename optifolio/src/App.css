@@ -40,6 +40,10 @@ body {
   font-family: 'ExtraBold', sans-serif;
 }
 
+.error-message {
+  color: red;
+}
+
 /* Main Elements */
 button {
   background-color: #EDEDED;
@@ -56,6 +60,13 @@ button {
 }
 button:focus {
   outline: none;
+}
+
+.custom-hr {
+  border: 0;
+  border-top: 2px solid #ccc;
+  margin: 0 auto 20px;
+  width: 50%;
 }
 
 input {
@@ -139,6 +150,10 @@ input {
   color: white;
 }
 
+#addStock {
+  margin-left: 10px;
+}
+
 /* Stock Output Container Styles */
 
 .portfolio-container {
@@ -152,6 +167,10 @@ input {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.legend-item:hover {
+  transform: scale(1.1);
 }
 
 .color-box {
@@ -169,6 +188,10 @@ input {
 
 .recharts-legend-item {
   margin-bottom: 2px;
+}
+
+.recharts-legend-item:hover {
+  transform: scale(1.1);
 }
 
 /* Date Container Styles */
