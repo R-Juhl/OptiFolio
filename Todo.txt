@@ -1,9 +1,5 @@
 Todo:
 
-Revisit disclaimer text: Add some cool sounding (chat gpt generated) disclaimer saying this is NFA and in reality people should not built their portfolio exactly like this
-Though it does provide inspiration and important insights. Also valuable to evaluate one's current portfolio
-
-Table with individual stocks expected returns and volatility below pie chart.
 Then some cool way to illustrate the expected return and volatility of the optimal (later the user-chosen) portfolio
 
 If possible, add slight zoom hover effect on mouse over legends and pie chart
@@ -38,6 +34,10 @@ Add more stock selection options/inspo and incorporate GPT api calls into this b
 Will be a challenge to get right output of ChatGPT (with great detailed prompt) to return available stocks and tickers, and how to convert these into possible user selections
 
 Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
+
+Add maximization of data range option/button. Extend start date to earliest IPO of stock selection. End date to most recent data.
+
+Incorporate easy upload of portfolio to adjust weights based on more recent historical data
 
 
 Notes/bugs and more:

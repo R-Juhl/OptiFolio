@@ -64,6 +64,36 @@ function StockSelect() {
     }
   }
 
+  function PortfolioTable({ tangencyPortfolio, individualStocks }) {
+    return (
+      <div className="portfolio-table-container">
+        <table className="portfolio-table">
+          <thead>
+            <tr>
+              <th>Stock/Portfolio</th>
+              <th>Expected Return</th>
+              <th>Volatility</th>
+            </tr>
+          </thead>
+          <tbody>
+            {individualStocks.map(stock => (
+              <tr key={stock.name}>
+                <td>{stock.name}</td>
+                <td>{(stock.return * 100).toFixed(2)}%</td>
+                <td>{(stock.volatility * Math.sqrt(252)).toFixed(2)}%</td>
+              </tr>
+            ))}
+            <tr>
+              <td>Optimal Portfolio (Tangency)</td>
+              <td>{(tangencyPortfolio.return * 100).toFixed(2)}%</td>
+              <td>{(tangencyPortfolio.volatility * Math.sqrt(252)).toFixed(2)}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   useEffect(() => {
     console.log("useEffect triggered");
     
@@ -158,7 +188,7 @@ function StockSelect() {
                 />
 
                 <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                <Legend align="right" verticalAlign="middle" layout="vertical" wrapperStyle={{ paddingLeft: '40px' }} />
+                <Legend align="right" verticalAlign="middle" layout="vertical" wrapperStyle={{ paddingLeft: '30px' }} />
                 <Scatter name="Efficient Frontier" data={efficientFrontier} fill="#36A2EB" line shape="circle" />
                 <Scatter name="Tangency Portfolio" data={[tangencyPortfolio]} fill="#FFCE56" shape="diamond" />
                 <Scatter name="Individual Stocks" data={individualStocks} fill="#4BC0C0" shape="circle" />
@@ -194,6 +224,15 @@ function StockSelect() {
                 ))}
               </div>
             </div>
+            {/* PortfolioTable */}
+            {
+              tangencyPortfolio && individualStocks.length > 0 && (
+                <PortfolioTable 
+                  tangencyPortfolio={tangencyPortfolio} 
+                  individualStocks={individualStocks} 
+                />
+              )
+            }
           </div>
         )
       }

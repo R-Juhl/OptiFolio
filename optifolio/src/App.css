@@ -87,7 +87,7 @@ input {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(150%, -90%);
+  transform: translate(150%, -70%);
   background-color: #EDEDED;
   color: #2D2D2D;
   padding: 20px;
@@ -145,7 +145,7 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px 0;
+  margin: 5px 0;
 }
 
 .legend-item {
@@ -183,6 +183,41 @@ input {
 
 .date-container p {
   margin-right: 10px;
+}
+
+/* Portfolio Table Styles */
+.portfolio-table-container {
+  margin-top: 0px;
+  margin-bottom: 20px;
+  overflow-x: auto; /* For horizontal scrolling on smaller screens */
+}
+
+.portfolio-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.portfolio-table th, .portfolio-table td {
+  border: 1px solid #EDEDED;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.portfolio-table th {
+  background-color: #282c34;
+  color: #EDEDED;
+}
+
+.portfolio-table tbody tr:nth-child(even) {
+  background-color: #3D3D3D;
+}
+
+.portfolio-table tbody tr:hover {
+  background-color: #ffb560;
+}
+
+.portfolio-table tbody tr:hover td {
+  color: #2D2D2D;
 }
 
 /* ======================
