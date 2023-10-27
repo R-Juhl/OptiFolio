@@ -15,6 +15,7 @@ function StockSelect() {
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
   const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
   const [errorMessage, setErrorMessage] = useState('');
+  const [stockError, setStockError] = useState('');
   const [dateRangeError, setDateRangeError] = useState('');
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
@@ -65,8 +66,20 @@ function StockSelect() {
       return;
     }
 
+    // Check if only one stock is selected
+    if (selectedStocks.length === 1) {
+      setStockError('Portfolio calculations require more than one stock.');
+    } else {
+      setStockError(''); // Clear the error if more than one stock is selected
+    }
+
     const isDateRangeValid = await checkDateRangeForStocks();
     if (!isDateRangeValid) {
+      return; // Return only if date range error exists
+    }
+
+    // If stockError exists, return after checking for dateRangeError
+    if (stockError) {
       return;
     }
 
@@ -91,6 +104,9 @@ function StockSelect() {
           setErrorMessage(data.error || "An error occurred while computing the portfolio.");
           return;
       }
+      // Clear error messages if successful
+      setErrorMessage('');
+      setDateRangeError('');
 
       console.log(data);
       setPortfolioWeights(data.weights);
@@ -193,6 +209,7 @@ function StockSelect() {
   }, [selectedStocks, startDate, endDate]);
   
 
+  //*** Rendering Code ***// 
   return (
     <div className="App">
       <br/>
@@ -206,7 +223,6 @@ function StockSelect() {
         placeholder="Enter stock ticker..."
       />
       <button id="addStock" className="main-button" onClick={addStock}>Add</button>
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       <p>Select and deselect any stock to create new optimal portfolios:</p>
       <div className="stock-container">
@@ -220,6 +236,8 @@ function StockSelect() {
             </div>
         ))}
       </div>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+      {stockError && <p className="error-message">{stockError}</p>}
       {dateRangeError && <p className="error-message">{dateRangeError}</p>}
 
       <div className="date-container">
@@ -240,8 +258,6 @@ function StockSelect() {
       <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
         CREATE MY PORTFOLIO ALREADY!
       </button>
-
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       {
         portfolioWeights && portfolioWeights.length === selectedStocks.length && (
