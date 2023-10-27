@@ -15,6 +15,7 @@ function StockSelect() {
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
   const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
   const [errorMessage, setErrorMessage] = useState('');
+  const [dateRangeError, setDateRangeError] = useState('');
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -28,11 +29,44 @@ function StockSelect() {
     }
   }
 
+  const checkDateRangeForStocks = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/check-daterange', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          stocks: selectedStocks,
+          startDate: startDate + "-01",  // Format to YYYY-MM-DD
+          endDate: endDate + "-01"
+        })
+      });
+  
+      const data = await response.json();
+      if (!data.valid) {
+        setDateRangeError(data.message);
+        return false;
+      } else {
+        setDateRangeError('');
+        return true;
+      }
+    } catch (error) {
+      console.error("Error checking date range:", error);
+      return false;
+    }
+  }  
+
   const computeOptimalPortfolio = async (currentController) => {
     // Reset weights to null every time before computing
     setPortfolioWeights(null);
     
     if (selectedStocks.length === 0) {
+      return;
+    }
+
+    const isDateRangeValid = await checkDateRangeForStocks();
+    if (!isDateRangeValid) {
       return;
     }
 
@@ -51,6 +85,13 @@ function StockSelect() {
       });
 
       const data = await response.json();
+
+      // Check if the backend returned an error:
+      if (response.status !== 200) {
+          setErrorMessage(data.error || "An error occurred while computing the portfolio.");
+          return;
+      }
+
       console.log(data);
       setPortfolioWeights(data.weights);
       setEfficientFrontier(data.frontier);
@@ -124,7 +165,7 @@ function StockSelect() {
   }
 
   useEffect(() => {
-    console.log("useEffect triggered");
+    // console.log("useEffect triggered");
     
       // Only compute the portfolio if the button has been clicked at least once
       if (hasClickedButton) {
@@ -179,6 +220,7 @@ function StockSelect() {
             </div>
         ))}
       </div>
+      {dateRangeError && <p className="error-message">{dateRangeError}</p>}
 
       <div className="date-container">
         <p>Choose date range for historical data:</p>
@@ -198,6 +240,8 @@ function StockSelect() {
       <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
         CREATE MY PORTFOLIO ALREADY!
       </button>
+
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       {
         portfolioWeights && portfolioWeights.length === selectedStocks.length && (

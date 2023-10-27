@@ -4,6 +4,7 @@ import yfinance as yf # for historical stock data
 import numpy as np # for numerical operations
 import pandas as pd # for data manipulation
 from scipy.optimize import minimize # for optimization
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 CORS(app)
@@ -49,11 +50,21 @@ def portfolio_performance(weights, expected_returns, covariance_matrix):
 
 @app.route('/api/compute-portfolio', methods=['POST'])
 def compute_portfolio():
-    stocks = request.json['stocks']
-    start_date = request.json['startDate']
-    end_date = request.json['endDate']
-    if len(stocks) == 1:
-        return jsonify({"weights": [1.0], "frontier": []})
+    try:
+        stocks = request.json['stocks']
+        start_date = request.json['startDate']
+        end_date = request.json['endDate']
+        if len(stocks) == 1:
+            return jsonify({
+                "weights": optimal_weights.tolist(), 
+                "frontier": frontier, 
+                "tangency": tangency_portfolio,
+                "stocks": individual_stocks,
+                "min_variance": min_variance_portfolio
+            })
+    except Exception as e:
+        print(f"Error computing portfolio: {e}")
+        return jsonify({"error": str(e)}), 400  # Return an error status
 
     data = fetch_stock_data(stocks, start_date, end_date)
     expected_returns, covariance_matrix, _ = compute_portfolio_metrics(data)
@@ -71,16 +82,12 @@ def compute_portfolio():
 
     # Return weights for optimal (tangency) portfolio
     optimal_weights = compute_optimal_portfolio(expected_returns, covariance_matrix)
-
     # Tangency Portfolio (highest Sharpe ratio)
     tangency_portfolio = max(frontier, key=lambda x: x["return"] / x["volatility"])
-
     # Individual Stock Data
     individual_stocks = [{"name": stock, "return": expected_returns[stock], "volatility": (covariance_matrix[stock][stock])**0.5} for stock in stocks]
-
     # Minimum Variance Portfolio
     min_variance_portfolio = min(frontier, key=lambda x: x["volatility"])
-
     
     return jsonify({
         "weights": optimal_weights.tolist(), 
@@ -102,6 +109,29 @@ def validate_stock():
     except Exception as e:
         print(f"Error validating stock {stock}: {e}")
         return jsonify({"valid": False, "message": f"{stock} is not a valid stock."})
+
+from datetime import datetime, timedelta
+
+@app.route('/api/check-daterange', methods=['POST'])
+def check_date_range():
+    stocks = request.json['stocks']
+    start_date = datetime.strptime(request.json['startDate'], '%Y-%m-%d')
+    end_date = datetime.strptime(request.json['endDate'], '%Y-%m-%d')
+    missing_data_stocks = []
+    
+    for stock in stocks:
+        data = yf.download(stock, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'), progress=False)
+        data_start_date = data.index[0]
+        data_end_date = data.index[-1]
+        
+        if abs((data_start_date - start_date).days) > 7 or abs((data_end_date - end_date).days) > 7:
+            missing_data_stocks.append(stock)
+            
+    if missing_data_stocks:
+        message = f"Stocks {', '.join(missing_data_stocks)} do not have continuous historical data for the entire specified date range."
+        return jsonify({"valid": False, "message": message})
+    else:
+        return jsonify({"valid": True, "message": ""})
 
 if __name__ == '__main__':
     app.run(debug=True)

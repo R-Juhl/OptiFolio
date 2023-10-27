@@ -1,17 +1,25 @@
 Todo:
 
-Add shorting option
-How to modify pie chart illustration??
-
 Add handling of when user-specified date range does not include historical data of one or more stocks (pre-ipo)
 *output message to user saying this
 
+Fix bug with incorrect computations and resulting weights when adding specific tickers and/or changing date range
+
+Also a problem where it seems weights are computed correctly for a tangency portfolio, but the legend for the pie chart indicates, for instance, 100% allocation to a stock when this is clearly not the case
+
 Do not display efficient frontier plot when only 1 stock selected (not relevant)
+
+
+
+Add zoom on pie chart slices ?? w. label popup if possible
 
 Add capital and convert optimal portfolio weights into target number of shares (rounded down)
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
 
-Use share counts after rounding to recalibrate target shares - will likely require recomputation
+Add shorting option
+How to modify pie chart illustration??
+
+For stock target and planning: Use share counts after rounding down to recalibrate target shares (effectively use leftover capital after rounding and optimize with this constraint) - will require recomputation
 
 Add RRA levels into the app using the risk-slider
 User will be able to chose portfolios from the frontier depending on their chosen risk aversian (RRA) level

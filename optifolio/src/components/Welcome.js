@@ -11,7 +11,7 @@ function Welcome(props) {
     <div className="App">
       <h2 className="title">Welcome to OptiFolio</h2>
       <img src={logo} className="App-logo" alt="logo" />
-      <p>Your go-to solution for creating a stock portfolio</p>
+      <p>Your go-to solution for creating an optimal stock portfolio</p>
       
       <button className="disclaimer-button" onClick={() => setShowDisclaimer(true)}>
         NFA: Read Disclaimer
