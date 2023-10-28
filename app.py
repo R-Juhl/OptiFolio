@@ -2,12 +2,16 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yfinance as yf # for historical stock data
 import numpy as np # for numerical operations
-import pandas as pd # for data manipulation
+# import pandas as pd # for data manipulation
 from scipy.optimize import minimize # for optimization
 from datetime import datetime, timedelta
+import openai
+import os
+api_key = os.environ.get("OPENAI_API_KEY")
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(app, origins=["http://localhost:3000"])
 
 @app.route('/')
 def index():
@@ -50,23 +54,24 @@ def portfolio_performance(weights, expected_returns, covariance_matrix):
 
 @app.route('/api/compute-portfolio', methods=['POST'])
 def compute_portfolio():
-    try:
-        stocks = request.json['stocks']
-        start_date = request.json['startDate']
-        end_date = request.json['endDate']
-        if len(stocks) == 1:
-            return jsonify({
-                "weights": optimal_weights.tolist(), 
-                "frontier": frontier, 
-                "tangency": tangency_portfolio,
-                "stocks": individual_stocks,
-                "min_variance": min_variance_portfolio
-            })
-    except Exception as e:
-        print(f"Error computing portfolio: {e}")
-        return jsonify({"error": str(e)}), 400  # Return an error status
+    stocks = request.json['stocks']
+    start_date = request.json['startDate']
+    end_date = request.json['endDate']
 
-    data = fetch_stock_data(stocks, start_date, end_date)
+    # If only one stock is selected, return a message
+    if len(stocks) == 1:
+        return jsonify({
+            "message": "Portfolio calculations require more than one stock.",
+        }), 400  # Return an error status
+
+    try:
+        data = fetch_stock_data(stocks, start_date, end_date)
+    except Exception as e:
+        return jsonify({
+            "message": f"Error fetching data for stocks: {e}",
+            "error": "Failed to retrieve historical data."
+        }), 400  # Return an error status
+
     expected_returns, covariance_matrix, _ = compute_portfolio_metrics(data)
     
     min_return = min(expected_returns)
@@ -132,6 +137,34 @@ def check_date_range():
         return jsonify({"valid": False, "message": message})
     else:
         return jsonify({"valid": True, "message": ""})
+
+last_call_time = None  # To keep track of the last time the API was called
+
+@app.route('/api/chat-gpt', methods=['POST'])
+def chat_gpt():
+    # print("API Key from Environment Variable:", os.environ.get("OPENAI_API_KEY"))
+
+    global last_call_time
+    query = request.json['query']
+    
+    # Check rate limiting
+    now = datetime.now()
+    if last_call_time and (now - last_call_time).total_seconds() < 30:
+        return jsonify({"error": "You can only make a request every 30 seconds."}), 429
+    
+    # Your OpenAI API Key
+    openai.api_key = api_key
+    
+    # Create a detailed prompt here:
+    user_message = request.json['query']
+    context = "I want you to recommend/suggest publicly traded companies based on the message below. I want you to recommend/suggest multiple companies when relevant or requested and send them in a list, and always with the companies tickers following their respective names in parenthesis. The context is that the user is looking for suggestions of industries and/or companies to research further for possible investment purposes. This is the user message:"
+    
+    # Make the API call
+    messages = [{"role": "system", "content": context}, {"role": "user", "content": user_message}]
+    response = openai.ChatCompletion.create(model="gpt-4", messages=messages)
+    
+    last_call_time = datetime.now()
+    return jsonify({"response": response.choices[0].message["content"].strip()})
 
 if __name__ == '__main__':
     app.run(debug=True)

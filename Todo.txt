@@ -1,17 +1,30 @@
 Todo:
 
-Add handling of when user-specified date range does not include historical data of one or more stocks (pre-ipo)
-*output message to user saying this
+
+----Bugs and fixes----
+
+Error when making quick selection changes (multiple)
 
 Fix bug with incorrect computations and resulting weights when adding specific tickers and/or changing date range
+It seems very clear that the pie chart and its legends weights are sometimes incorrect. Try TSLA+META for example. Opposite weights.
 
 Also a problem where it seems weights are computed correctly for a tangency portfolio, but the legend for the pie chart indicates, for instance, 100% allocation to a stock when this is clearly not the case
 
-Do not display efficient frontier plot when only 1 stock selected (not relevant)
+Also many scenarios where it does not automatically recompute and redisplay outputs. Test app for these.
 
+Adjust user fascing error messaging behavior. Different scenarios, multiple error handling, etc.
 
+Fix bug with Reach Hook useCallback missing a dependency
+Implement useCallback: const computeOptimalPortfolio = useCallback(async (currentController) => {
+And add dependencies: , [selectedStocks, startDate, endDate]);
+And fix the bugs that then occur. Something for a rainy day.
 
-Add zoom on pie chart slices ?? w. label popup if possible
+add width limit to available bucket of stocks and instead skip to next line
+* maybe add some background vis to highlight the bucket too
+
+----------------------
+
+Fix hover zoom on pie chart. Ideally to zoom on slices w. label popup if possible
 
 Add capital and convert optimal portfolio weights into target number of shares (rounded down)
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
@@ -35,15 +48,14 @@ Then use all this data to output table w. stock purchase plan per month. Also ad
 Add lifecycle functionality to budgeting element. Option for user to specify increase in risk aversion that scales with time based on time to retirement
 *Will be incorporated in stock purchase plan
 
-Add more stock selection options/inspo and incorporate GPT api calls into this based on user's interest, desired industries, etc.
-Will be a challenge to get right output of ChatGPT (with great detailed prompt) to return available stocks and tickers, and how to convert these into possible user selections
-
 Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
 
 Add maximization of data range option/button. Extend start date to earliest IPO of stock selection. End date to most recent data.
 
 Incorporate easy upload of portfolio to adjust weights based on more recent historical data
 
+Links and popups on legend text/elements
 
 Notes/bugs and more:
 Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates
+also the exp ret and vol, and weights are affected

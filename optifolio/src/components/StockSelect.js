@@ -17,6 +17,8 @@ function StockSelect() {
   const [errorMessage, setErrorMessage] = useState('');
   const [stockError, setStockError] = useState('');
   const [dateRangeError, setDateRangeError] = useState('');
+  const [gptQuery, setGptQuery] = useState('');
+  const [gptResponse, setGptResponse] = useState('');
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -124,6 +126,31 @@ function StockSelect() {
     }
   }
 
+  const askGptForSuggestions = async () => {
+    try {
+        const response = await fetch('http://localhost:5000/api/chat-gpt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query: gptQuery })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) {
+            setErrorMessage(data.error); // Display rate limiting error
+        } else {
+            setGptResponse(data.response);
+        }
+    } catch (error) {
+        console.error("Error asking GPT:", error);
+    }
+  }
+
   const addStock = async () => {
     try {
         const response = await fetch('http://localhost:5000/api/validate-stock', {
@@ -214,6 +241,23 @@ function StockSelect() {
     <div className="App">
       <br/>
       <hr className="custom-hr" />
+
+      <p>Ask for stock suggestions if you need inspiration:</p>
+      <p>You can ask for inspiration in general or request stock suggestions from specific industries you may be interested in:</p>
+      <p>For instance: "Automobile companies" or more unique, like "Companies that will succeed if X comes true"</p>
+      <input 
+          id="gptQueryInput"
+          type="text" 
+          value={gptQuery}
+          onChange={e => setGptQuery(e.target.value)}
+          placeholder="Enter your query for stock suggestions..."
+      />
+      <button id="askGpt" className="main-button" onClick={askGptForSuggestions}>Ask GPT</button>
+      <br/>
+      {gptResponse && <p className="gpt-response">{gptResponse}</p>}
+
+      <br/><hr className="custom-hr" />
+
       <h2>Select Stocks</h2>
       <p>Type a stock ticker and add to available stocks:</p>
       <input 
@@ -298,7 +342,8 @@ function StockSelect() {
 
             {/* Container for Pie Chart and Legend */}
             <div className="portfolio-container">
-              <PieChart width={400} height={400}>
+              <div className="pie-chart-wrapper">
+                <PieChart width={400} height={400}>
                 <Pie
                   data={selectedStocks.map((stock, index) => ({ name: stock, value: portfolioWeights[index] }))}
                   cx={200}
@@ -306,12 +351,14 @@ function StockSelect() {
                   labelLine={false}
                   outerRadius={150}
                   fill="#8884d8"
+                  dataKey="value"
                 >
-                  {
-                    selectedStocks.map((stock, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
-                  }
-                </Pie>
-              </PieChart>
+                    {
+                      selectedStocks.map((stock, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
+                    }
+                  </Pie>
+                </PieChart>
+              </div>
               <div className="legend">
                 {selectedStocks.map((stock, index) => (
                   <div key={stock} className="legend-item">

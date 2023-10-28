@@ -208,6 +208,30 @@ input {
   margin-right: 10px;
 }
 
+/* Pie Chart Styles */
+
+.pie-chart-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.pie-chart-wrapper::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  right: 50%;
+  bottom: 50%;
+  z-index: 2; /* Ensuring it's above the chart but below any interactive elements */
+  pointer-events: none; /* Ensures that it doesn't interfere with any interactions */
+}
+
+.pie-chart-wrapper:hover .recharts-wrapper {
+  transform: scale(1.1);
+  transition: transform 0.3s;
+}
+
 /* Portfolio Table Styles */
 .portfolio-table-container {
   margin-top: 0px;
@@ -241,6 +265,27 @@ input {
 
 .portfolio-table tbody tr:hover td {
   color: #2D2D2D;
+}
+
+/* GPT Styles */
+
+.gpt-response {
+  max-width: 50%;
+  color: #ffb560;
+  margin: 0 auto;
+  word-wrap: break-word;
+  background-color: #1f1f1f;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+#askGpt {
+  margin: 0px 10px;
+}
+
+#gptQueryInput {
+  padding: 10px;
+  margin-bottom: 20px; /* Adjust this value if you want more/less space below the input field */
 }
 
 /* ======================
