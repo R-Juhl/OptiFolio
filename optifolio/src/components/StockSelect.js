@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import InvestPlan from './InvestPlan';
 
 function StockSelect() {
   const [selectedStocks, setSelectedStocks] = useState([]);
@@ -20,6 +21,7 @@ function StockSelect() {
   const [gptQuery, setGptQuery] = useState('');
   const [gptResponse, setGptResponse] = useState('');
   const [gptLoading, setGptLoading] = useState(false);
+  const [showInvestPlan, setShowInvestPlan] = useState(false);
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -248,7 +250,7 @@ function StockSelect() {
 
       <p>Ask for stock suggestions if you need inspiration:</p>
       <p>You can ask for inspiration in general or request stock suggestions from specific industries you may be interested in:</p>
-      <p>For instance: "Automobile companies" or more unique requests, like "Companies that will succeed if X comes true"</p>
+      <p>For instance, you can request: "Automobile companies" or more unique requests, like "Companies that will succeed if X comes true"</p>
       <input 
           id="gptQueryInput"
           type="text" 
@@ -387,6 +389,14 @@ function StockSelect() {
             }
           </div>
         )
+      }
+      <br/>
+      <p>When you are done constructing a portfolio, click the button below to generate an investment plan:</p>
+      {
+        showInvestPlan ? 
+        <InvestPlan /> 
+        : 
+        <button onClick={() => setShowInvestPlan(true)}>Proceed to Investment Plan</button>
       }
     </div>
   );

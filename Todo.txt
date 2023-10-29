@@ -1,5 +1,8 @@
 Todo:
 
+Add countdown gpt error to frontend display and include time-to-next-query
+
+Existing share count (for user) with input in table w. row for each stock for InvestPlan comp.
 
 ----Bugs and fixes----
 

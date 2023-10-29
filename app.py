@@ -10,7 +10,6 @@ import os
 api_key = os.environ.get("OPENAI_API_KEY")
 
 app = Flask(__name__)
-# CORS(app)
 CORS(app, origins=["http://localhost:3000"])
 
 @app.route('/')

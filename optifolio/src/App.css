@@ -267,10 +267,14 @@ input {
   color: #2D2D2D;
 }
 
+#submitButton {
+  margin: 0px 10px;
+}
+
 /* GPT Styles */
 
 .gpt-response {
-  max-width: 50%;
+  max-width: 48%;
   color: #ffb560;
   margin: 0 auto;
   word-wrap: break-word;
