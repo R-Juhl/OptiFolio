@@ -285,7 +285,8 @@ input {
 
 #gptQueryInput {
   padding: 10px;
-  margin-bottom: 20px; /* Adjust this value if you want more/less space below the input field */
+  width: 15%;
+  margin-bottom: 20px;
 }
 
 /* ======================
@@ -301,6 +302,17 @@ input {
   .App-logo {
       animation: App-logo-spin 5s ease-in-out infinite;
   }
+}
+
+@keyframes loadingAnimation {
+  0%, 100% { content: "Loading ."; }
+  33% { content: "Loading .."; }
+  66% { content: "Loading ..."; }
+}
+
+.loading-text::after {
+  content: "Loading .";
+  animation: loadingAnimation 1.5s infinite;
 }
 
 /* ======================

@@ -19,6 +19,7 @@ function StockSelect() {
   const [dateRangeError, setDateRangeError] = useState('');
   const [gptQuery, setGptQuery] = useState('');
   const [gptResponse, setGptResponse] = useState('');
+  const [gptLoading, setGptLoading] = useState(false);
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -127,6 +128,7 @@ function StockSelect() {
   }
 
   const askGptForSuggestions = async () => {
+    setGptLoading(true);  // Start loading
     try {
         const response = await fetch('http://localhost:5000/api/chat-gpt', {
             method: 'POST',
@@ -148,6 +150,8 @@ function StockSelect() {
         }
     } catch (error) {
         console.error("Error asking GPT:", error);
+    } finally {
+      setGptLoading(false);  // Stop loading
     }
   }
 
@@ -244,7 +248,7 @@ function StockSelect() {
 
       <p>Ask for stock suggestions if you need inspiration:</p>
       <p>You can ask for inspiration in general or request stock suggestions from specific industries you may be interested in:</p>
-      <p>For instance: "Automobile companies" or more unique, like "Companies that will succeed if X comes true"</p>
+      <p>For instance: "Automobile companies" or more unique requests, like "Companies that will succeed if X comes true"</p>
       <input 
           id="gptQueryInput"
           type="text" 
@@ -254,6 +258,7 @@ function StockSelect() {
       />
       <button id="askGpt" className="main-button" onClick={askGptForSuggestions}>Ask GPT</button>
       <br/>
+      {gptLoading && <p className="loading-text"></p>}
       {gptResponse && <p className="gpt-response">{gptResponse}</p>}
 
       <br/><hr className="custom-hr" />
