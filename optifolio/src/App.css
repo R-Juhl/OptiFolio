@@ -1,3 +1,12 @@
+/* Color Palette */
+
+/* background-color: #282c34; */
+/* section-color: #4D495C; */
+/* sub-section-color: #6B667B; */
+/* highlight color: #ffb560 */
+/* error color: red */
+
+
 /* ======================
    GLOBAL STYLES 
    ====================== */
@@ -16,15 +25,22 @@ body {
   text-align: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.Sec {
+  background-color: #4D495C;
+  width: 50%;
+  margin: 0 auto;
+  border-radius: 25px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
   color: white;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .App-link {
@@ -65,8 +81,8 @@ button:focus {
 .custom-hr {
   border: 0;
   border-top: 2px solid #ccc;
-  margin: 0 auto 20px;
-  width: 50%;
+  margin: 20px auto 20px;
+  width: 90%;
 }
 
 input {
@@ -122,13 +138,64 @@ input {
   color: #ffb560;
 }
 
-/* Stock Selection */
+/* Numbered List Styles and Animation */
+
+.numbered-list {
+  text-align: center;
+  list-style: none;
+  padding: 0;
+  background-color: #6B667B;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 10px 0;
+  counter-reset: li;
+}
+
+.numbered-list li {
+  position: relative;
+  padding-top: 50px;
+  margin-bottom: 20px;
+  transition: transform 0.3s, font-weight 0.3s;
+}
+
+.numbered-list li:hover {
+  transform: scale(1.02); /* Slight zoom effect */
+  font-weight: bold; /* Make the text bold */
+}
+
+.numbered-list li::before {
+  content: counter(li); /* Use CSS counters for the number */
+  counter-increment: li; /* Increment the counter */
+  position: absolute; /* Absolutely position the number */
+  top: 0; /* Position it to the top */
+  left: 50%; /* Center the number */
+  transform: translateX(-50%); /* Perfectly center the number */
+  font-size: 24px; /* Bigger font size for the number */
+  background-color: #4D495C; /* Use a contrast color for the circle */
+  color: #ffb560; /* Text color */
+  border-radius: 50%; /* Make it circular */
+  width: 40px;
+  height: 40px;
+  line-height: 40px; /* Vertically center the number */
+  text-align: center;
+  font-family: 'Bold', sans-serif; /* Use the bold font */
+  transition: transform 0.3s; /* Transition for the hover effect */
+}
+
+.numbered-list li:hover::before {
+  transform: rotate(30deg) translateX(-50%); /* Rotate the number while keeping it centered */
+}
+
+/* Stock Container Styles */
 .stock-container {
+  max-width: 48%;
+  margin: 20px auto;
   display: flex;
+  background-color: #6B667B;
   justify-content: center;
   flex-wrap: wrap;
   gap: 20px;
-  margin: 20px 0;
+  padding: 20px;
 }
 
 .stock-box {
@@ -154,7 +221,17 @@ input {
   margin-left: 10px;
 }
 
-/* Stock Output Container Styles */
+/* Frontier Container */
+
+.recharts-legend-item {
+  margin-bottom: 10px;
+}
+
+.recharts-legend-item:hover {
+  transform: scale(1.1);
+}
+
+/* Pie Chart Container */
 
 .portfolio-container {
   display: flex;
@@ -179,6 +256,8 @@ input {
   margin-right: 5px;
 }
 
+/* Stock Table Container */
+
 .chart-container {
   display: flex;
   flex-direction: column;
@@ -186,13 +265,6 @@ input {
   gap: 0px;
 }
 
-.recharts-legend-item {
-  margin-bottom: 2px;
-}
-
-.recharts-legend-item:hover {
-  transform: scale(1.1);
-}
 
 /* Date Container Styles */
 
@@ -292,6 +364,10 @@ input {
   width: 15%;
   margin-bottom: 20px;
 }
+
+/* Investment Plan Styles */
+
+
 
 /* ======================
    ANIMATIONS 

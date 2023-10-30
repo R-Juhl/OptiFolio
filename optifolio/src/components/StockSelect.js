@@ -11,6 +11,7 @@ function StockSelect() {
   const [minVariancePortfolio, setMinVariancePortfolio] = useState(null);
   const [hasClickedButton, setHasClickedButton] = useState(false);
   const [controller, setController] = useState(new AbortController()); // AbortController for fetch
+  const [risk, setRisk] = useState(5);
   const [startDate, setStartDate] = useState("2015-01");
   const [endDate, setEndDate] = useState("2023-01");
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
@@ -21,6 +22,8 @@ function StockSelect() {
   const [gptQuery, setGptQuery] = useState('');
   const [gptResponse, setGptResponse] = useState('');
   const [gptLoading, setGptLoading] = useState(false);
+  const [gptErrorMessage, setGptErrorMessage] = useState('');
+  const [cooldownTime, setCooldownTime] = useState(null);
   const [showInvestPlan, setShowInvestPlan] = useState(false);
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
@@ -105,10 +108,10 @@ function StockSelect() {
       const data = await response.json();
 
       // Check if the backend returned an error:
-      if (response.status !== 200) {
-          setErrorMessage(data.error || "An error occurred while computing the portfolio.");
-          return;
+      if (!response.ok) {
+        throw new Error(data.error || "An error occurred while computing the portfolio.");
       }
+    
       // Clear error messages if successful
       setErrorMessage('');
       setDateRangeError('');
@@ -131,6 +134,14 @@ function StockSelect() {
 
   const askGptForSuggestions = async () => {
     setGptLoading(true);  // Start loading
+
+    if (cooldownTime && cooldownTime > Date.now()) {
+      const secondsLeft = Math.ceil((cooldownTime - Date.now()) / 1000);
+      setGptErrorMessage(`Due to a rate limit on GPT requests, please wait ${secondsLeft} seconds before submitting a new request.`);
+      setGptLoading(false);
+      return;
+    }
+
     try {
         const response = await fetch('http://localhost:5000/api/chat-gpt', {
             method: 'POST',
@@ -146,7 +157,8 @@ function StockSelect() {
 
         const data = await response.json();
         if (data.error) {
-            setErrorMessage(data.error); // Display rate limiting error
+            setGptErrorMessage(data.error); // Display rate limiting error
+            setCooldownTime(Date.now() + 30000);  // Set cooldown time to 30 seconds from now
         } else {
             setGptResponse(data.response);
         }
@@ -214,8 +226,6 @@ function StockSelect() {
   }
 
   useEffect(() => {
-    // console.log("useEffect triggered");
-    
       // Only compute the portfolio if the button has been clicked at least once
       if (hasClickedButton) {
         if (selectedStocks.length > 0) {
@@ -224,11 +234,11 @@ function StockSelect() {
             controller.abort();
         }
 
-        // Create a new AbortController for the fetch
+        // Create AbortController for the fetch
         const newController = new AbortController();
         setController(newController);
 
-        // Compute the optimal portfolio with the new controller
+        // Compute the optimal portfolio with the controller
         computeOptimalPortfolio(newController);
       } else {
         // Reset all states if no stocks are selected
@@ -244,10 +254,8 @@ function StockSelect() {
 
   //*** Rendering Code ***// 
   return (
-    <div className="App">
-      <br/>
-      <hr className="custom-hr" />
-
+    <div className="Sec">
+      <h2>Ask GPT for Inspiration</h2>
       <p>Ask for stock suggestions if you need inspiration:</p>
       <p>You can ask for inspiration in general or request stock suggestions from specific industries you may be interested in:</p>
       <p>For instance, you can request: "Automobile companies" or more unique requests, like "Companies that will succeed if X comes true"</p>
@@ -263,7 +271,7 @@ function StockSelect() {
       {gptLoading && <p className="loading-text"></p>}
       {gptResponse && <p className="gpt-response">{gptResponse}</p>}
 
-      <br/><hr className="custom-hr" />
+      <hr className="custom-hr" />
 
       <h2>Select Stocks</h2>
       <p>Type a stock ticker and add to available stocks:</p>
@@ -287,9 +295,21 @@ function StockSelect() {
             </div>
         ))}
       </div>
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
       {stockError && <p className="error-message">{stockError}</p>}
       {dateRangeError && <p className="error-message">{dateRangeError}</p>}
+      {gptErrorMessage && <p className="error-message">{gptErrorMessage}</p>}
+      
+      <label htmlFor="risk">Risk Level: </label>
+      <input 
+        type="range" 
+        id="risk" 
+        name="risk" 
+        min="1" 
+        max="10"
+        value={risk}
+        onChange={e => setRisk(e.target.value)}
+      />
+      <span id="riskDisplay">{risk}</span>
 
       <div className="date-container">
         <p>Choose date range for historical data:</p>
@@ -309,11 +329,12 @@ function StockSelect() {
       <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
         CREATE MY PORTFOLIO ALREADY!
       </button>
-
+    
       {
         portfolioWeights && portfolioWeights.length === selectedStocks.length && (
           <div className="chart-container">
             {/* Container for Efficient Frontier */}
+            <hr className="custom-hr" />
             <div className="frontier-container">
             <ScatterChart
                 width={850}
@@ -327,15 +348,28 @@ function StockSelect() {
                   name="Volatility"
                   unit="%"
                   tickFormatter={(value) => value.toFixed(1)}
-                  label={{ value: 'Volatility', position: 'bottom' }} 
+                  tick={{ fill: 'white', fontWeight: 'regular' }}
+                  label={{ 
+                    value: 'Exp. Volatility', 
+                    position: 'bottom',
+                    style: { fill: 'white', fontWeight: 'bold' }
+                  }} 
                 />
                 <YAxis 
                   type="number" 
                   dataKey={entry => entry.return * 100}
-                  name="Expected Return" 
+                  name="Exp. Return" 
                   unit="%"
                   tickFormatter={(value) => value.toFixed(1)}
-                  label={{ value: 'Expected Return', position: 'outsideLeft', angle: -90, dx: -40, dy: -0 }} 
+                  tick={{ fill: 'white', fontWeight: 'regular' }}
+                  label={{ 
+                    value: 'Expected Return', 
+                    position: 'outsideLeft', 
+                    angle: -90, 
+                    dx: -40, 
+                    dy: -0,
+                    style: { fill: 'white', fontWeight: 'bold' }
+                  }} 
                 />
 
                 <Tooltip cursor={{ strokeDasharray: '3 3' }} />
@@ -373,7 +407,7 @@ function StockSelect() {
                       className="color-box" 
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     ></span>
-                    {stock}: {portfolioWeights[index].toFixed(2)}
+                    {stock}: {portfolioWeights[index].toFixed(5)}
                   </div>
                 ))}
               </div>
@@ -391,12 +425,19 @@ function StockSelect() {
         )
       }
       <br/>
-      <p>When you are done constructing a portfolio, click the button below to generate an investment plan:</p>
       {
-        showInvestPlan ? 
-        <InvestPlan /> 
-        : 
-        <button onClick={() => setShowInvestPlan(true)}>Proceed to Investment Plan</button>
+        hasClickedButton && (
+          <>
+            <p>When you are done constructing a portfolio, click the button below to generate an investment plan:</p>
+            {
+              showInvestPlan ?
+              <InvestPlan optimalPortfolio={tangencyPortfolio} selectedStocks={selectedStocks} portfolioWeights={portfolioWeights} />
+              : 
+              <button id="invesplan-button" className="main-button" onClick={() => setShowInvestPlan(true)}>PROCEED TO INVESTMENT PLAN</button>
+            }
+            <br/><br/>
+          </>
+        )
       }
     </div>
   );

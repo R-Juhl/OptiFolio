@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import logo from '../images/logo.svg';
 
 function Welcome(props) {
-  const [capital, setCapital] = useState('');
-  const [risk, setRisk] = useState(5);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   //const [experience, setExperience] = useState('');
 
   return (
-    <div className="App">
+    <div className="Sec">
       <h2 className="title">Welcome to OptiFolio</h2>
       <img src={logo} className="App-logo" alt="logo" />
       <p>Your go-to solution for creating an optimal stock portfolio</p>
@@ -16,6 +14,15 @@ function Welcome(props) {
       <button className="disclaimer-button" onClick={() => setShowDisclaimer(true)}>
         NFA: Read Disclaimer
       </button>
+
+      <p>!!! THIS APP IS STILL IN DEMO AND IS MISSING FUNCTIONALITY !!!</p>
+
+      <ul className="numbered-list">
+        <li>Add and select any stocks you want included in your portfolio</li>
+        <li>Generate optimal portfolios</li>
+        <li>Adjust risk levels and other parameters to tailor the portfolio to your individual needs</li>
+        <li>Generate and download your stock purchase plan</li>
+      </ul>
 
       {showDisclaimer && (
         <div className="disclaimer-popup">
@@ -30,59 +37,6 @@ function Welcome(props) {
             on our suggestions, make sure to double-check your own research.</p>
         </div>
       )}
-
-      <br/><label htmlFor="capital">Total Capital (USD): </label>
-      <input 
-        type="number" 
-        id="capital" 
-        name="capital" 
-        placeholder="Enter your total capital"
-        value={capital}
-        onChange={e => setCapital(e.target.value)}
-      /><br/>
-
-      <br/><label htmlFor="risk">Risk Level: </label>
-      <input 
-        type="range" 
-        id="risk" 
-        name="risk" 
-        min="1" 
-        max="10"
-        value={risk}
-        onChange={e => setRisk(e.target.value)}
-      />
-      <span id="riskDisplay">{risk}</span><br/><br/>
-      
-      {/*
-      <br/><br/><h3>Select your experience level:</h3>
-      <input 
-        type="radio" 
-        id="beginner" 
-        name="experience" 
-        value="beginner"
-        checked={experience === 'beginner'}
-        onChange={e => setExperience(e.target.value)}
-      />
-      <label htmlFor="beginner">Beginner</label><br/>
-      <input 
-        type="radio" 
-        id="intermediate" 
-        name="experience" 
-        value="intermediate"
-        checked={experience === 'intermediate'}
-        onChange={e => setExperience(e.target.value)}
-      />
-      <label htmlFor="intermediate">Intermediate</label><br/>
-      <input 
-        type="radio" 
-        id="expert" 
-        name="experience" 
-        value="expert"
-        checked={experience === 'expert'}
-        onChange={e => setExperience(e.target.value)}
-      />
-      <label htmlFor="expert">Expert</label><br/><br/>
-      */}
 
       <button className="main-button" onClick={props.onGetStartedClick}>
         GET STARTED

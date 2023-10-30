@@ -1,8 +1,27 @@
 Todo:
 
-Add countdown gpt error to frontend display and include time-to-next-query
+Finish making containers for each component
+*Investplan a separate container and do not remove the button
+
+Fix input field sizing and move button up on-line with field
+*make standardized types of input fields
+
+
 
 Existing share count (for user) with input in table w. row for each stock for InvestPlan comp.
+
+Remove investplan component when user makes changes to portfolio?
+*currently some bugs
+
+Fix countdown gpt error to display on UI w. time-to-next-query
+
+Transition from tangency portfolio as default to TargetPortfolio:
+Add RRA levels into the app using the risk-slider
+User will be able to chose portfolios from the frontier depending on their chosen risk aversian (RRA) level
+*Make sure that current points on the frontier match with these RRA levels. Same number of points. When risk level changes the frontier updates automatically
+Move risk level down to stock selection (or below frontier perhaps?) and consider deleting experience level funct.
+*dynamic changes to the frontier illustration based on RRA
+
 
 ----Bugs and fixes----
 
@@ -36,11 +55,6 @@ Add shorting option
 How to modify pie chart illustration??
 
 For stock target and planning: Use share counts after rounding down to recalibrate target shares (effectively use leftover capital after rounding and optimize with this constraint) - will require recomputation
-
-Add RRA levels into the app using the risk-slider
-User will be able to chose portfolios from the frontier depending on their chosen risk aversian (RRA) level
-*Make sure that current points on the frontier match with these RRA levels. Same number of points. When risk level changes the frontier updates automatically
-Move risk level down to stock selection (or below frontier perhaps?) and consider deleting experience level funct.
 
 Add budgeting functionality.
 Monthly budget to invest in stocks
