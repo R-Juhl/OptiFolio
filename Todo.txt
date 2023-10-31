@@ -1,10 +1,16 @@
 Todo:
 
 
+-----Next up-----
 
-Move long messages (popups) to separate doc and load from .js (if possible) ??
+Add invest plan excel download
+*lots of bugs currently. Different lengths for the variables sent to endpoint. What is most weird is that it varies.
 
-Existing share count (for user) with input in table w. row for each stock for InvestPlan comp.
+Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
+
+
+
+Current vs target portfolio pie chart comparison/illustration side-by-side
 
 Remove investplan component when user makes changes to portfolio?
 *currently some bugs
@@ -19,7 +25,28 @@ Move risk level down to stock selection (or below frontier perhaps?) and conside
 Fix countdown gpt error to display on UI w. time-to-next-query
 
 
-----Bugs and fixes----
+
+-----New features-----
+
+Improve excel invest plan
+
+Move long messages (popups) from .js to separate doc and load from .js (if possible) ??
+
+Fix hover zoom on pie chart. Ideally to zoom on slices w. label popup if possible
+
+Add budgeting functionality.
+Monthly budget to invest in stocks
+Current portfolio input option (otherwise default to 0). Holdings of other stocks than optimal (chosen portfolio) ignored.
+Add option to add custom transaction costs per stock purchase (broker fees)
+Then use all this data to output table w. stock purchase plan per month. Also add functionality to download as excel for offline use
+
+Add lifecycle functionality to budgeting element. Option for user to specify increase in risk aversion that scales with time based on time to retirement
+*Will be incorporated in stock purchase plan
+
+Links and popups on legend text/elements
+
+
+-----Bugs and fixes-----
 
 Error when making quick selection changes (multiple)
 
@@ -43,37 +70,25 @@ add width limit to available bucket of stocks and instead skip to next line
 Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates
 also the exp ret and vol, and weights are affected
 
-----------------------
+-----Finalization-----
 
-Fix hover zoom on pie chart. Ideally to zoom on slices w. label popup if possible
+Build app and deploy on Cloud (V1.0)
+*environment variables for API endpoints
+*deploy on DigitalOcean
 
-Add capital and convert optimal portfolio weights into target number of shares (rounded down)
-Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
 
-Add invest plan excel download
-
-Add shorting option
-How to modify pie chart illustration??
-
-For stock target and planning: Use share counts after rounding down to recalibrate target shares (effectively use leftover capital after rounding and optimize with this constraint) - will require recomputation
-
-Add budgeting functionality.
-Monthly budget to invest in stocks
-Current portfolio input option (otherwise default to 0). Holdings of other stocks than optimal (chosen portfolio) ignored.
-Add option to add custom transaction costs per stock purchase (broker fees)
-Then use all this data to output table w. stock purchase plan per month. Also add functionality to download as excel for offline use
-
-Add lifecycle functionality to budgeting element. Option for user to specify increase in risk aversion that scales with time based on time to retirement
-*Will be incorporated in stock purchase plan
-
-Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
+-----V1.0+-----
 
 Add maximization of data range option/button. Extend start date to earliest IPO of stock selection. End date to most recent data.
 
-Incorporate easy upload of portfolio to adjust weights based on more recent historical data
+Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
 
-Links and popups on legend text/elements
+Add shorting option
+*How to modify pie chart illustration??
 
 Add optional BTC % allocation to portfolio
+*Create and link to a blog page (on app or my website) that details why this is a sound decision
 
-Build app and host on Cloud (V1.0)
+Implement "risk-free" rate
+
+Incorporate easy upload of portfolio to adjust weights based on more recent historical data

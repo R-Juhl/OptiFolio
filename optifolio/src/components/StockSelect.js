@@ -464,9 +464,10 @@ function StockSelect(props) {
           <>
             <p>When you are done constructing a portfolio, click the button below to generate an investment plan:</p>
             {
+              /*
               showInvestPlan ?
               <InvestPlan optimalPortfolio={tangencyPortfolio} selectedStocks={selectedStocks} portfolioWeights={portfolioWeights} />
-              : 
+              : */
               <button className="main-button" onClick={props.onGenerateInvestPlanClick}>
                 GENERATE INVESTMENT PLAN
               </button>

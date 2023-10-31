@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 import yfinance as yf # for historical stock data
 import numpy as np # for numerical operations
-# import pandas as pd # for data manipulation
 from scipy.optimize import minimize # for optimization
 from datetime import datetime, timedelta
+import xlsxwriter
+from io import BytesIO
 import openai
 import os
 api_key = os.environ.get("OPENAI_API_KEY")
@@ -162,6 +163,66 @@ def chat_gpt():
     
     last_call_time = datetime.now()
     return jsonify({"response": response.choices[0].message["content"].strip()})
+
+@app.route('/api/get-stock-prices', methods=['POST'])
+def get_stock_prices():
+    print("Endpoint hit!")
+    stocks = request.json['stocks']
+    print("Fetching data for stocks:", stocks)
+    try:
+        data = yf.download(stocks, period="1d")['Adj Close'].iloc[-1]  # Last row for current prices
+        print("Data fetched:", data.to_dict())
+        return jsonify({"prices": data.to_dict()})
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({
+            "message": f"Error fetching data for stocks: {e}",
+            "error": "Failed to retrieve stock prices."
+        }), 400
+
+@app.route('/api/generate-excel', methods=['POST'])
+def generate_excel():
+    stocks = request.json['stocks']
+    target_percentages = request.json['targetPercentages']
+    target_shares = request.json['targetShares']
+    current_shares = request.json['currentShares']
+    shares_to_buy = request.json['sharesToBuy']
+
+    # Create a workbook and add a worksheet.
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet("Investment Plan")
+
+    # Add table headers
+    worksheet.write("A1", "Stocks")
+    worksheet.write("B1", "Target Allocation (%)")
+    worksheet.write("C1", "Target Allocation (shares)")
+    worksheet.write("D1", "Current shares")
+    worksheet.write("E1", "Shares to Buy")
+
+    # Write data
+    for i, stock in enumerate(stocks):
+        print(len(stocks))
+        print(len(target_percentages))
+        print(len(target_shares))
+        print(len(current_shares))
+        print(len(shares_to_buy))
+
+        if not all(len(lst) == len(stocks) for lst in [target_percentages, target_shares, current_shares, shares_to_buy]):
+            return jsonify({"error": "Mismatch in input data lengths."}), 400
+
+        worksheet.write(i + 1, 0, stock)
+        worksheet.write(i + 1, 1, target_percentages[i])
+        worksheet.write(i + 1, 2, target_shares[i])
+        worksheet.write(i + 1, 3, current_shares[i])
+        worksheet.write(i + 1, 4, shares_to_buy[i])
+
+    workbook.close()
+    output.seek(0)
+
+    response = app.response_class(output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response.headers['Content-Disposition'] = 'attachment; filename=OptiFolio Investment Plan.xlsx'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
