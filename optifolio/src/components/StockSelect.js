@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import InvestPlan from './InvestPlan';
 
-function StockSelect() {
-  const [selectedStocks, setSelectedStocks] = useState([]);
-  const [portfolioWeights, setPortfolioWeights] = useState(null);
+function StockSelect(props) {
+  const { selectedStocks, setSelectedStocks, portfolioWeights, setPortfolioWeights, tangencyPortfolio, setTangencyPortfolio } = props;
+
   const [efficientFrontier, setEfficientFrontier] = useState([]);
-  const [tangencyPortfolio, setTangencyPortfolio] = useState(null);
   const [individualStocks, setIndividualStocks] = useState([]);
   const [minVariancePortfolio, setMinVariancePortfolio] = useState(null);
   const [hasClickedButton, setHasClickedButton] = useState(false);
@@ -16,7 +15,6 @@ function StockSelect() {
   const [endDate, setEndDate] = useState("2023-01");
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
   const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
-  const [errorMessage, setErrorMessage] = useState('');
   const [stockError, setStockError] = useState('');
   const [dateRangeError, setDateRangeError] = useState('');
   const [gptQuery, setGptQuery] = useState('');
@@ -24,6 +22,7 @@ function StockSelect() {
   const [gptLoading, setGptLoading] = useState(false);
   const [gptErrorMessage, setGptErrorMessage] = useState('');
   const [cooldownTime, setCooldownTime] = useState(null);
+  const [showMethod, setShowMethod] = useState(false);
   const [showInvestPlan, setShowInvestPlan] = useState(false);
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
@@ -113,7 +112,6 @@ function StockSelect() {
       }
     
       // Clear error messages if successful
-      setErrorMessage('');
       setDateRangeError('');
 
       console.log(data);
@@ -185,10 +183,8 @@ function StockSelect() {
             setAvailableStocks(prevStocks => [...prevStocks, newStock]);
             console.log(availableStocks);
             setNewStock('');
-            setErrorMessage('');  // Clear any previous error messages
         } else {
             console.error(data.message);
-            setErrorMessage(data.message); // User facing error messaging
         }
     } catch (error) {
         // console.error("Error adding stock:", error);
@@ -256,18 +252,27 @@ function StockSelect() {
   return (
     <div className="Sec">
       <h2>Ask GPT for Inspiration</h2>
-      <p>Ask for stock suggestions if you need inspiration:</p>
-      <p>You can ask for inspiration in general or request stock suggestions from specific industries you may be interested in:</p>
-      <p>For instance, you can request: "Automobile companies" or more unique requests, like "Companies that will succeed if X comes true"</p>
-      <input 
+      <p>Need stock suggestions? Let GPT inspire you!</p>
+      <p>GPT can help with both straightforward and imaginative requests, whether they're broad or specific. <br />Here are some sample queries:</p>
+      
+      <ul className="gpt-examples-list">
+        <li>"Car companies"</li>
+        <li>"Blue Chip companies"</li>
+        <li>"Companies investing heavily in X"</li>
+        <li>"Companies that have a monopoly in their respective business niche"</li>
+        <li>"Companies that will succeed if X comes true"</li>
+      </ul>
+
+      <div className="query-container">
+        <input 
           id="gptQueryInput"
           type="text" 
           value={gptQuery}
           onChange={e => setGptQuery(e.target.value)}
           placeholder="Enter your query for stock suggestions..."
-      />
-      <button id="askGpt" className="main-button" onClick={askGptForSuggestions}>Ask GPT</button>
-      <br/>
+        />
+        <button id="askGpt" className="main-button" onClick={askGptForSuggestions}>Ask GPT</button>
+      </div>
       {gptLoading && <p className="loading-text"></p>}
       {gptResponse && <p className="gpt-response">{gptResponse}</p>}
 
@@ -275,13 +280,16 @@ function StockSelect() {
 
       <h2>Select Stocks</h2>
       <p>Type a stock ticker and add to available stocks:</p>
-      <input 
-        type="text" 
-        value={newStock}
-        onChange={e => setNewStock(e.target.value.toUpperCase())}
-        placeholder="Enter stock ticker..."
-      />
-      <button id="addStock" className="main-button" onClick={addStock}>Add</button>
+      <div className="query-container">
+        <input
+          id="stockInput"
+          type="text" 
+          value={newStock}
+          onChange={e => setNewStock(e.target.value.toUpperCase())}
+          placeholder="Enter stock ticker..."
+        />
+        <button id="addStock" className="main-button" onClick={addStock}>Add</button>
+      </div>
 
       <p>Select and deselect any stock to create new optimal portfolios:</p>
       <div className="stock-container">
@@ -299,17 +307,23 @@ function StockSelect() {
       {dateRangeError && <p className="error-message">{dateRangeError}</p>}
       {gptErrorMessage && <p className="error-message">{gptErrorMessage}</p>}
       
-      <label htmlFor="risk">Risk Level: </label>
-      <input 
-        type="range" 
-        id="risk" 
-        name="risk" 
-        min="1" 
-        max="10"
-        value={risk}
-        onChange={e => setRisk(e.target.value)}
-      />
-      <span id="riskDisplay">{risk}</span>
+      <div className="slider-container">
+        <label htmlFor="risk" className="risk-title">Risk Level:</label>
+        <div className="slider-wrapper">
+          <span className="risk-label">Low</span>
+          <input 
+            type="range" 
+            id="risk" 
+            name="risk" 
+            min="1" 
+            max="10"
+            value={risk}
+            onChange={e => setRisk(e.target.value)}
+          />
+          <span className="risk-label">High</span>
+        </div>
+        <span id="riskDisplay">{risk}</span>
+      </div>
 
       <div className="date-container">
         <p>Choose date range for historical data:</p>
@@ -327,14 +341,33 @@ function StockSelect() {
       </div>
 
       <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
-        CREATE MY PORTFOLIO ALREADY!
+        CREATE PORTFOLIO
       </button>
     
       {
         portfolioWeights && portfolioWeights.length === selectedStocks.length && (
           <div className="chart-container">
-            {/* Container for Efficient Frontier */}
+
             <hr className="custom-hr" />
+            <h2>Your Portfolio</h2>
+
+            <button className="popup-button" onClick={() => setShowMethod(true)}>
+              How does this work?
+            </button>
+
+            {showMethod && (
+              <div className="method-popup">
+                <button className="close-button" onClick={() => setShowMethod(false)}>X</button>
+                <h3>How Does This Work?</h3>
+                <p>When you select a set of stocks, this app dives into their historical data to understand how they have performed in the past. Using this information, it then calculates the "best mix" of these stocks to create a portfolio that offers the highest return for a given level of risk.</p>
+                <p>It does this by employing the principles of Modern Portfolio Theory (MPT). Specifically, it uses Mean-Variance Optimization to derive the Efficient Frontier.</p>
+                <p>Imagine you're assembling a musical band with a mix of instruments like guitars, drums, and keyboards. You want the right balance, so every song they play strikes the perfect chord and harmony. Similarly, this app ensures that your portfolio has the right balance of stocks, so your investments work together in harmony, each complementing the other.</p>
+                <p>The curve you see is the Efficient Frontier. It represents the optimal portfolios that offer the highest expected return for a given level of risk. But how do you translate this into actionable investment decisions? The Pie Chart below it breaks down the optimal portfolio for the specified risk-level by displaying the proportion, or weight, of each selected stock. In essence, it visualizes how you might distribute your investments among these stocks for the best risk-return trade-off.</p>
+                <p>Lastly, the table beneath provides a detailed look at the expected annual return and volatility of each individual stock and the optimal portfolio. It's a way to quantify the potential performance of each asset and the combined portfolio.</p>
+              </div>
+            )}
+
+            {/* Container for Efficient Frontier */}
             <div className="frontier-container">
             <ScatterChart
                 width={850}
@@ -347,28 +380,28 @@ function StockSelect() {
                   dataKey={entry => entry.volatility * Math.sqrt(252)}
                   name="Volatility"
                   unit="%"
-                  tickFormatter={(value) => value.toFixed(1)}
+                  tickFormatter={(value) => value.toFixed(0)}
                   tick={{ fill: 'white', fontWeight: 'regular' }}
                   label={{ 
-                    value: 'Exp. Volatility', 
+                    value: 'Exp. Volatility (Risk)', 
                     position: 'bottom',
-                    style: { fill: 'white', fontWeight: 'bold' }
+                    style: { fill: 'white', fontWeight: 'regular' }
                   }} 
                 />
                 <YAxis 
                   type="number" 
                   dataKey={entry => entry.return * 100}
-                  name="Exp. Return" 
+                  name="Return" 
                   unit="%"
-                  tickFormatter={(value) => value.toFixed(1)}
+                  tickFormatter={(value) => value.toFixed(0)}
                   tick={{ fill: 'white', fontWeight: 'regular' }}
                   label={{ 
-                    value: 'Expected Return', 
+                    value: 'Exp. Return', 
                     position: 'outsideLeft', 
                     angle: -90, 
                     dx: -40, 
                     dy: -0,
-                    style: { fill: 'white', fontWeight: 'bold' }
+                    style: { fill: 'white', fontWeight: 'regular' }
                   }} 
                 />
 
@@ -401,6 +434,7 @@ function StockSelect() {
                 </PieChart>
               </div>
               <div className="legend">
+                <div className="pie-chart-title">Weights:</div>
                 {selectedStocks.map((stock, index) => (
                   <div key={stock} className="legend-item">
                     <span 
@@ -433,7 +467,9 @@ function StockSelect() {
               showInvestPlan ?
               <InvestPlan optimalPortfolio={tangencyPortfolio} selectedStocks={selectedStocks} portfolioWeights={portfolioWeights} />
               : 
-              <button id="invesplan-button" className="main-button" onClick={() => setShowInvestPlan(true)}>PROCEED TO INVESTMENT PLAN</button>
+              <button className="main-button" onClick={props.onGenerateInvestPlanClick}>
+                GENERATE INVESTMENT PLAN
+              </button>
             }
             <br/><br/>
           </>

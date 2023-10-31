@@ -141,8 +141,6 @@ last_call_time = None  # To keep track of the last time the API was called
 
 @app.route('/api/chat-gpt', methods=['POST'])
 def chat_gpt():
-    # print("API Key from Environment Variable:", os.environ.get("OPENAI_API_KEY"))
-
     global last_call_time
     query = request.json['query']
     

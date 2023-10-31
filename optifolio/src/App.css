@@ -65,6 +65,7 @@ button {
   background-color: #EDEDED;
   border: none;
   padding: 10px 20px;
+  margin: 10px 10px;
   cursor: pointer;
   color: #2D2D2D;
   transition: background-color 0.3s;
@@ -74,6 +75,7 @@ button {
 .main-button:hover {
   background-color: #ffb560;
 }
+
 button:focus {
   outline: none;
 }
@@ -95,8 +97,16 @@ input {
   font-family: 'Bold', sans-serif;
 }
 
-/* Disclaimer Popup Styles */
-.disclaimer-button {
+.query-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Popup Styles */
+.popup-button {
   background: none;
   border: none;
   color: #EDEDED;
@@ -106,7 +116,21 @@ input {
   margin-bottom: 10px;
 }
 
-.disclaimer-button:hover {
+.popup-button:hover {
+  color: #ffb560;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #2D2D2D;
+  position: left;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.close-button:hover {
   color: #ffb560;
 }
 
@@ -124,18 +148,18 @@ input {
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
-.close-button {
-  background: none;
-  border: none;
+.method-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(115%, -50%);
+  background-color: #EDEDED;
   color: #2D2D2D;
-  position: left;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-}
-
-.close-button:hover {
-  color: #ffb560;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 400px;
+  z-index: 10;  /* Ensure it's on top */
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
 /* Numbered List Styles and Animation */
@@ -143,10 +167,10 @@ input {
 .numbered-list {
   text-align: center;
   list-style: none;
-  padding: 0;
   background-color: #6B667B;
   border-radius: 10px;
   padding: 20px;
+  padding-bottom: 10px;
   margin: 10px 0;
   counter-reset: li;
 }
@@ -159,37 +183,75 @@ input {
 }
 
 .numbered-list li:hover {
-  transform: scale(1.02); /* Slight zoom effect */
-  font-weight: bold; /* Make the text bold */
+  transform: scale(1.02);
+  font-weight: bold;
 }
 
 .numbered-list li::before {
   content: counter(li); /* Use CSS counters for the number */
   counter-increment: li; /* Increment the counter */
-  position: absolute; /* Absolutely position the number */
-  top: 0; /* Position it to the top */
-  left: 50%; /* Center the number */
-  transform: translateX(-50%); /* Perfectly center the number */
-  font-size: 24px; /* Bigger font size for the number */
-  background-color: #4D495C; /* Use a contrast color for the circle */
-  color: #ffb560; /* Text color */
-  border-radius: 50%; /* Make it circular */
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  background-color: #4D495C;
+  color: #ffb560;
+  border-radius: 50%;
   width: 40px;
   height: 40px;
-  line-height: 40px; /* Vertically center the number */
+  line-height: 40px;
   text-align: center;
-  font-family: 'Bold', sans-serif; /* Use the bold font */
-  transition: transform 0.3s; /* Transition for the hover effect */
+  font-family: 'Bold', sans-serif;
+  transition: transform 0.3s;
 }
 
 .numbered-list li:hover::before {
-  transform: rotate(30deg) translateX(-50%); /* Rotate the number while keeping it centered */
+  transform: rotate(30deg) translateX(-50%);
 }
 
-/* Stock Container Styles */
-.stock-container {
+/* GPT Styles */
+
+.gpt-response {
   max-width: 48%;
-  margin: 20px auto;
+  color: #ffb560;
+  margin: 0 auto;
+  word-wrap: break-word;
+  background-color: #1f1f1f;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+#gptQueryInput {
+  padding: 10px;
+  width: 300px;
+}
+
+.gpt-examples-list {
+  list-style-type: disc;
+  text-align: left;
+  padding-left: 20px;
+  margin-top: 10px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gpt-examples-list li {
+  margin-bottom: 5px;
+}
+
+/* Stock Selection Styles */
+
+#stockInput {
+  padding: 10px;
+  width: 150px;
+}
+
+.stock-container {
+  max-width: 80%;
+  margin: auto;
+  margin-bottom: 20px;
   display: flex;
   background-color: #6B667B;
   justify-content: center;
@@ -217,8 +279,48 @@ input {
   color: white;
 }
 
-#addStock {
-  margin-left: 10px;
+/* Risk Slider Styles */
+
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.risk-title {
+  margin-top: 5px;
+  margin-bottom: 0px;
+}
+
+.risk-label {
+  font-size: 0.8rem;
+}
+
+#riskDisplay {
+  margin-top: 0px;
+}
+
+
+/* Date Container Styles */
+
+.date-container {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.date-container p {
+  margin-right: 10px;
 }
 
 /* Frontier Container */
@@ -256,32 +358,6 @@ input {
   margin-right: 5px;
 }
 
-/* Stock Table Container */
-
-.chart-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0px;
-}
-
-
-/* Date Container Styles */
-
-.date-container {
-  margin: 20px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-}
-
-.date-container p {
-  margin-right: 10px;
-}
-
-/* Pie Chart Styles */
-
 .pie-chart-wrapper {
   position: relative;
   display: inline-block;
@@ -295,8 +371,8 @@ input {
   left: 50%;
   right: 50%;
   bottom: 50%;
-  z-index: 2; /* Ensuring it's above the chart but below any interactive elements */
-  pointer-events: none; /* Ensures that it doesn't interfere with any interactions */
+  z-index: 2;
+  pointer-events: none;
 }
 
 .pie-chart-wrapper:hover .recharts-wrapper {
@@ -304,7 +380,22 @@ input {
   transition: transform 0.3s;
 }
 
-/* Portfolio Table Styles */
+.pie-chart-title {
+  text-align: center;
+  font-weight: regular;
+  margin-bottom: 10px;
+  color: #EDEDED;
+}
+
+/* Stock/Portfolio Table Container */
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+}
+
 .portfolio-table-container {
   margin-top: 0px;
   margin-bottom: 20px;
@@ -337,32 +428,6 @@ input {
 
 .portfolio-table tbody tr:hover td {
   color: #2D2D2D;
-}
-
-#submitButton {
-  margin: 0px 10px;
-}
-
-/* GPT Styles */
-
-.gpt-response {
-  max-width: 48%;
-  color: #ffb560;
-  margin: 0 auto;
-  word-wrap: break-word;
-  background-color: #1f1f1f;
-  padding: 20px;
-  border-radius: 5px;
-}
-
-#askGpt {
-  margin: 0px 10px;
-}
-
-#gptQueryInput {
-  padding: 10px;
-  width: 15%;
-  margin-bottom: 20px;
 }
 
 /* Investment Plan Styles */

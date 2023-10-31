@@ -3,7 +3,6 @@ import logo from '../images/logo.svg';
 
 function Welcome(props) {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
-  //const [experience, setExperience] = useState('');
 
   return (
     <div className="Sec">
@@ -11,16 +10,14 @@ function Welcome(props) {
       <img src={logo} className="App-logo" alt="logo" />
       <p>Your go-to solution for creating an optimal stock portfolio</p>
       
-      <button className="disclaimer-button" onClick={() => setShowDisclaimer(true)}>
+      <button className="popup-button" onClick={() => setShowDisclaimer(true)}>
         NFA: Read Disclaimer
       </button>
 
-      <p>!!! THIS APP IS STILL IN DEMO AND IS MISSING FUNCTIONALITY !!!</p>
-
       <ul className="numbered-list">
         <li>Add and select any stocks you want included in your portfolio</li>
+        <li>Adjust risk levels and other parameters to tailor the portfolio to your individual preferences</li>
         <li>Generate optimal portfolios</li>
-        <li>Adjust risk levels and other parameters to tailor the portfolio to your individual needs</li>
         <li>Generate and download your stock purchase plan</li>
       </ul>
 

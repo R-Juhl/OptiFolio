@@ -1,19 +1,13 @@
 Todo:
 
-Finish making containers for each component
-*Investplan a separate container and do not remove the button
-
-Fix input field sizing and move button up on-line with field
-*make standardized types of input fields
 
 
+Move long messages (popups) to separate doc and load from .js (if possible) ??
 
 Existing share count (for user) with input in table w. row for each stock for InvestPlan comp.
 
 Remove investplan component when user makes changes to portfolio?
 *currently some bugs
-
-Fix countdown gpt error to display on UI w. time-to-next-query
 
 Transition from tangency portfolio as default to TargetPortfolio:
 Add RRA levels into the app using the risk-slider
@@ -21,6 +15,8 @@ User will be able to chose portfolios from the frontier depending on their chose
 *Make sure that current points on the frontier match with these RRA levels. Same number of points. When risk level changes the frontier updates automatically
 Move risk level down to stock selection (or below frontier perhaps?) and consider deleting experience level funct.
 *dynamic changes to the frontier illustration based on RRA
+
+Fix countdown gpt error to display on UI w. time-to-next-query
 
 
 ----Bugs and fixes----
@@ -44,12 +40,17 @@ And fix the bugs that then occur. Something for a rainy day.
 add width limit to available bucket of stocks and instead skip to next line
 * maybe add some background vis to highlight the bucket too
 
+Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates
+also the exp ret and vol, and weights are affected
+
 ----------------------
 
 Fix hover zoom on pie chart. Ideally to zoom on slices w. label popup if possible
 
 Add capital and convert optimal portfolio weights into target number of shares (rounded down)
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
+
+Add invest plan excel download
 
 Add shorting option
 How to modify pie chart illustration??
@@ -73,6 +74,6 @@ Incorporate easy upload of portfolio to adjust weights based on more recent hist
 
 Links and popups on legend text/elements
 
-Notes/bugs and more:
-Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates
-also the exp ret and vol, and weights are affected
+Add optional BTC % allocation to portfolio
+
+Build app and host on Cloud (V1.0)

@@ -6,11 +6,6 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
   const [transFee, setTransFee] = useState('');
   const [shareCounts, setShareCounts] = useState({});
 
-  const handleSubmit = () => {
-    // Here you can handle the logic after user submits their monthly surplus
-    console.log('Monthly Surplus Submitted:', monthlySurplus);
-  }
-
   // Function to handle share count input change
   const handleShareChange = (stock, value) => {
     setShareCounts(prevCounts => ({ ...prevCounts, [stock]: value }));
@@ -18,24 +13,26 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
 
   return (
     <div className="Sec">
-        <h3>Investment Plan</h3>
-        <br/><label htmlFor="capital">Total Capital (USD): </label>
-        <input 
-          type="number" 
-          id="capital" 
-          name="capital" 
-          placeholder="Enter your total capital"
-          value={capital}
-          onChange={e => setCapital(e.target.value)}
-        /><br/>
-        <p>Please specify how much surplus you have available each month that you wish to invest:</p>
+        <h2>Investment Plan</h2>
+        <p>Total Capital (in USD):</p>
+        <div className="query-container">
+          <input 
+            type="number" 
+            id="capital" 
+            name="capital" 
+            placeholder="Enter your total capital"
+            value={capital}
+            onChange={e => setCapital(e.target.value)}
+          />
+        </div>
+
+        <p>Please specify how much surplus you have available each month that you intend to invest:</p>
         <input
             type="number"
             placeholder="Enter monthly surplus"
             value={monthlySurplus}
             onChange={e => setMonthlySurplus(e.target.value)}
         />
-        <button id="submitButton" className="main-button" onClick={handleSubmit}>Submit</button>
 
         <p>For a more accurate stock purchase plan, please specify transaction/broker fees per stock order (optional):</p>
         <input
@@ -44,8 +41,8 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
             value={transFee}
             onChange={e => setTransFee(e.target.value)}
         />
-        <button id="submitButton" className="main-button" onClick={handleSubmit}>Submit</button>
 
+        <br/>
         <h3>Your Existing Shares</h3>
         <p>Enter the number of shares you already own for each stock (if any):</p>
         <div className="portfolio-table-container">
