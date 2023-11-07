@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import InvestPlan from './InvestPlan';
 
 function StockSelect(props) {
-  const { selectedStocks, setSelectedStocks, portfolioWeights, setPortfolioWeights, tangencyPortfolio, setTangencyPortfolio } = props;
+  const { selectedStocks, setSelectedStocks, portfolioWeights, setPortfolioWeights, tangencyPortfolio, setTangencyPortfolio, optimalPortfolio, setOptimalPortfolio } = props;
 
   const [efficientFrontier, setEfficientFrontier] = useState([]);
   const [individualStocks, setIndividualStocks] = useState([]);
@@ -14,6 +13,9 @@ function StockSelect(props) {
   const [startDate, setStartDate] = useState("2015-01");
   const [endDate, setEndDate] = useState("2023-01");
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
+  
+  const [sortedSelectedStocks, setSortedSelectedStocks] = useState([]);
+  
   const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
   const [stockError, setStockError] = useState('');
   const [dateRangeError, setDateRangeError] = useState('');
@@ -23,7 +25,6 @@ function StockSelect(props) {
   const [gptErrorMessage, setGptErrorMessage] = useState('');
   const [cooldownTime, setCooldownTime] = useState(null);
   const [showMethod, setShowMethod] = useState(false);
-  const [showInvestPlan, setShowInvestPlan] = useState(false);
   const COLORS = [
     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF5733', '#33FF57', 
     '#8533FF', '#33FFF5', '#FF33F5', '#F5FF33'
@@ -91,15 +92,17 @@ function StockSelect(props) {
     }
 
     try {
+      const sortedSelectedStocks = [...selectedStocks].sort();
       const response = await fetch('http://localhost:5000/api/compute-portfolio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          stocks: selectedStocks,
+          stocks: sortedSelectedStocks,
           startDate: startDate + "-01",  // Format to YYYY-MM-DD
-          endDate: endDate + "-01"
+          endDate: endDate + "-01",
+          riskLevel: risk // Send risk level to backend
         }),
         signal: currentController.signal // Use the passed controller
       });
@@ -115,9 +118,19 @@ function StockSelect(props) {
       setDateRangeError('');
 
       console.log(data);
-      setPortfolioWeights(data.weights);
+
+      const processedWeights = data.weights.map(weight => Math.abs(weight) < 1e-15 ? 0 : weight);
+
+      // Assuming data.weights are returned in the order of sortedStocks
+      const weightsMapping = sortedSelectedStocks.reduce((acc, stock, index) => {
+        acc[stock] = processedWeights[index];
+        return acc;
+      }, {});
+
+      setPortfolioWeights(weightsMapping);
       setEfficientFrontier(data.frontier);
       setTangencyPortfolio(data.tangency);
+      setOptimalPortfolio(data.optimalPortfolio); // Set optimal portfolio for use in InvestPlan
       setIndividualStocks(data.stocks);
       setMinVariancePortfolio(data.min_variance);
       setHasClickedButton(true);
@@ -211,9 +224,9 @@ function StockSelect(props) {
               </tr>
             ))}
             <tr>
-              <td>Optimal Portfolio (Tangency)</td>
-              <td>{(tangencyPortfolio.return * 100).toFixed(2)}%</td>
-              <td>{(tangencyPortfolio.volatility * Math.sqrt(252)).toFixed(2)}%</td>
+              <td>Your Optimal Portfolio</td>
+              <td>{(optimalPortfolio.return * 100).toFixed(2)}%</td>
+              <td>{(optimalPortfolio.volatility * Math.sqrt(252)).toFixed(2)}%</td>
             </tr>
           </tbody>
         </table>
@@ -233,6 +246,10 @@ function StockSelect(props) {
         // Create AbortController for the fetch
         const newController = new AbortController();
         setController(newController);
+        
+        // Sort the selected stocks and update sortedSelectedStocks
+        const sortedStocks = [...selectedStocks].sort();
+        setSortedSelectedStocks(sortedStocks);
 
         // Compute the optimal portfolio with the controller
         computeOptimalPortfolio(newController);
@@ -343,9 +360,11 @@ function StockSelect(props) {
       <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
         CREATE PORTFOLIO
       </button>
+      
     
       {
-        portfolioWeights && portfolioWeights.length === selectedStocks.length && (
+        //portfolioWeights && portfolioWeights.length === selectedStocks.length && (
+        portfolioWeights && Object.keys(portfolioWeights).length === selectedStocks.length && (
           <div className="chart-container">
 
             <hr className="custom-hr" />
@@ -411,6 +430,7 @@ function StockSelect(props) {
                 <Scatter name="Tangency Portfolio" data={[tangencyPortfolio]} fill="#FFCE56" shape="diamond" />
                 <Scatter name="Individual Stocks" data={individualStocks} fill="#4BC0C0" shape="circle" />
                 <Scatter name="Min Variance Portfolio" data={[minVariancePortfolio]} fill="#FF5733" shape="triangle" />
+                <Scatter name="Your Optimal Portfolio" data={[optimalPortfolio]} fill="#33FF57" shape="star" />
               </ScatterChart>
             </div>
 
@@ -419,7 +439,10 @@ function StockSelect(props) {
               <div className="pie-chart-wrapper">
                 <PieChart width={400} height={400}>
                 <Pie
-                  data={selectedStocks.map((stock, index) => ({ name: stock, value: portfolioWeights[index] }))}
+                  data={sortedSelectedStocks.map(stock => ({
+                    name: stock,
+                    value: portfolioWeights[stock]
+                  }))}
                   cx={200}
                   cy={200}
                   labelLine={false}
@@ -427,21 +450,23 @@ function StockSelect(props) {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                    {
-                      selectedStocks.map((stock, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
-                    }
-                  </Pie>
+                  {
+                    sortedSelectedStocks.map((stock, index) => (
+                      <Cell key={`cell-${stock}`} fill={COLORS[sortedSelectedStocks.indexOf(stock) % COLORS.length]} />
+                    ))
+                  }
+                </Pie>
                 </PieChart>
               </div>
               <div className="legend">
                 <div className="pie-chart-title">Weights:</div>
-                {selectedStocks.map((stock, index) => (
+                {sortedSelectedStocks.map((stock, index) => (
                   <div key={stock} className="legend-item">
                     <span 
                       className="color-box" 
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     ></span>
-                    {stock}: {portfolioWeights[index].toFixed(5)}
+                    {stock}: {portfolioWeights[stock].toFixed(3)}
                   </div>
                 ))}
               </div>
@@ -450,7 +475,7 @@ function StockSelect(props) {
             {
               tangencyPortfolio && individualStocks.length > 0 && (
                 <PortfolioTable 
-                  tangencyPortfolio={tangencyPortfolio} 
+                  optimalPortfolio={optimalPortfolio} 
                   individualStocks={individualStocks} 
                 />
               )
@@ -464,10 +489,6 @@ function StockSelect(props) {
           <>
             <p>When you are done constructing a portfolio, click the button below to generate an investment plan:</p>
             {
-              /*
-              showInvestPlan ?
-              <InvestPlan optimalPortfolio={tangencyPortfolio} selectedStocks={selectedStocks} portfolioWeights={portfolioWeights} />
-              : */
               <button className="main-button" onClick={props.onGenerateInvestPlanClick}>
                 GENERATE INVESTMENT PLAN
               </button>

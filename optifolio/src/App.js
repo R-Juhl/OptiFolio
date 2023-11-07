@@ -10,7 +10,17 @@ function App() {
 
   const [selectedStocks, setSelectedStocks] = useState([]);
   const [tangencyPortfolio, setTangencyPortfolio] = useState(null);
+  const [optimalPortfolio, setOptimalPortfolio] = useState(null);
   const [portfolioWeights, setPortfolioWeights] = useState(null);
+
+  console.log(portfolioWeights)
+
+  
+  const filteredStocks = portfolioWeights 
+    ? Object.keys(portfolioWeights).filter(stock => portfolioWeights[stock] > 0)
+    : [];
+  const filteredWeights = filteredStocks.map(stock => portfolioWeights[stock]);
+  
 
   // References for smooth scrolling
   const stockSelectRef = useRef(null);
@@ -45,15 +55,17 @@ function App() {
           setSelectedStocks={setSelectedStocks}
           tangencyPortfolio={tangencyPortfolio}
           setTangencyPortfolio={setTangencyPortfolio}
+          optimalPortfolio={optimalPortfolio}
+          setOptimalPortfolio={setOptimalPortfolio}
           portfolioWeights={portfolioWeights}
           setPortfolioWeights={setPortfolioWeights}
         />
       </div>}
       {showInvestPlan && <div ref={investPlanRef}>
         <InvestPlan
-          optimalPortfolio={tangencyPortfolio} 
-          selectedStocks={selectedStocks} 
-          portfolioWeights={portfolioWeights}
+          optimalPortfolio={optimalPortfolio} 
+          filteredStocks={filteredStocks} 
+          filteredWeights={filteredWeights}
         />
       </div>}
     </div>

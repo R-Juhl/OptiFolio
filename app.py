@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, Response, send_file
 from flask_cors import CORS
 import yfinance as yf # for historical stock data
 import numpy as np # for numerical operations
 from scipy.optimize import minimize # for optimization
 from datetime import datetime, timedelta
-import xlsxwriter
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 from io import BytesIO
 import openai
 import os
@@ -18,7 +19,6 @@ def index():
     return jsonify({"message": "Welcome to OptiFolio API!"})
 
 def fetch_stock_data(stocks, start_date, end_date):
-    # data = yf.download(stocks, start="2015-01-01", end="2023-01-01")['Adj Close']
     data = yf.download(stocks, start=start_date, end=end_date)['Adj Close']
     return data
 
@@ -57,6 +57,15 @@ def compute_portfolio():
     stocks = request.json['stocks']
     start_date = request.json['startDate']
     end_date = request.json['endDate']
+    risk_level = request.json['riskLevel']  # Get risk level from the request
+
+    # Convert risk_level to an integer
+    try:
+        risk_level = int(risk_level)
+    except ValueError:
+        return jsonify({
+            "message": "Invalid risk level. Risk level should be a number.",
+        }), 400  # Return an error status if risk_level is not a number
 
     # If only one stock is selected, return a message
     if len(stocks) == 1:
@@ -73,7 +82,6 @@ def compute_portfolio():
         }), 400  # Return an error status
 
     expected_returns, covariance_matrix, _ = compute_portfolio_metrics(data)
-    
     min_return = min(expected_returns)
     max_return = max(expected_returns)
     target_returns = np.linspace(min_return, max_return, 12)  # 12 points on the frontier
@@ -86,7 +94,7 @@ def compute_portfolio():
         frontier.append({"return": port_return, "volatility": port_volatility})
 
     # Return weights for optimal (tangency) portfolio
-    optimal_weights = compute_optimal_portfolio(expected_returns, covariance_matrix)
+    #optimal_weights = compute_optimal_portfolio(expected_returns, covariance_matrix)
     # Tangency Portfolio (highest Sharpe ratio)
     tangency_portfolio = max(frontier, key=lambda x: x["return"] / x["volatility"])
     # Individual Stock Data
@@ -94,12 +102,29 @@ def compute_portfolio():
     # Minimum Variance Portfolio
     min_variance_portfolio = min(frontier, key=lambda x: x["volatility"])
     
+    # Compute the optimal portfolio based on the risk level
+    if risk_level <= 5:
+        # Scale between minimum variance and tangency
+        scale = (risk_level - 1) / 4.0  # Scale from 0 to 1 as risk level goes from 1 to 5
+        optimal_return = min_variance_portfolio['return'] + (tangency_portfolio['return'] - min_variance_portfolio['return']) * scale
+    else:
+        # Scale between tangency and maximum return
+        scale = (risk_level - 5) / 5.0  # Scale from 0 to 1 as risk level goes from 5 to 10
+        optimal_return = tangency_portfolio['return'] + (max_return - tangency_portfolio['return']) * scale
+
+    # Find the closest matching portfolio on the frontier
+    optimal_portfolio = min(frontier, key=lambda x: abs(x['return'] - optimal_return))
+
+    # Calculate the weights for the optimal portfolio again since we need them to match the optimal_return
+    optimal_weights = compute_optimal_portfolio(expected_returns, covariance_matrix, optimal_portfolio['return'])
+
     return jsonify({
         "weights": optimal_weights.tolist(), 
         "frontier": frontier, 
         "tangency": tangency_portfolio,
         "stocks": individual_stocks,
-        "min_variance": min_variance_portfolio
+        "min_variance": min_variance_portfolio,
+        "optimalPortfolio": optimal_portfolio
     })
 
 @app.route('/api/validate-stock', methods=['POST'])
@@ -182,46 +207,79 @@ def get_stock_prices():
 
 @app.route('/api/generate-excel', methods=['POST'])
 def generate_excel():
-    stocks = request.json['stocks']
-    target_percentages = request.json['targetPercentages']
-    target_shares = request.json['targetShares']
-    current_shares = request.json['currentShares']
-    shares_to_buy = request.json['sharesToBuy']
+    data = request.json
+    stocks = data['stocks']
+    target_percentages = data['targetPercentages']
+    current_shares = data['currentShares']
+    current_prices = data['currentPrices']  # Assuming you are sending this data
+    shares_to_buy = data['sharesToBuy']
+    surplus = data['surplus']
+    fee = data['fee']
+    monthly_investment_plan = data['monthlyInvestmentPlan']
+    current_month = datetime.now().month
 
-    # Create a workbook and add a worksheet.
+    # Load the Excel template
+    template_path = 'plan/OptiFolio_Template.xlsm'
+    wb = load_workbook(filename=template_path, keep_vba=True)
+    ws = wb["Investment Plan"]
+
+    # Styles
+    yellow_fill = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+
+    # Add table headers for initial investments based on capital
+    headers = ["Stocks", "Current Price", "Target Allocation (%)", "Current shares", "Shares to Buy"]
+    for col_num, header in enumerate(headers, start=1):
+        ws.cell(row=1, column=col_num).value = header
+
+    # Write initial data
+    for i, stock in enumerate(stocks, start=1):
+        row = [
+            stock,
+            round(current_prices[i-2], 1),  # Current price
+            round(target_percentages[i-2], 1),  # Target allocation %
+            float(current_shares[i-2]),  # Current shares
+            shares_to_buy[i-2]  # Shares to buy
+        ]
+        ws.append(row)  # This will add each stock's data as a new row
+
+    # Apply styles
+    for i in range(2, len(stocks) + 2):
+        ws.cell(row=i, column=4).fill = yellow_fill
+
+    # Define ranges for the VBA function
+    stocks_range = f"A2:A{len(stocks)+1}"
+    prices_range = f"B2:B{len(stocks)+1}"
+    weights_range = f"C2:C{len(stocks)+1}"
+    current_shares_range = f"D2:D{len(stocks)+1}"
+
+    # Start writing monthly plan
+    row_offset = len(stocks) + 4
+    for period, monthly_data in enumerate(monthly_investment_plan, start=1):
+        month_name = datetime(1900, (current_month + period - 1) % 12 + 1, 1).strftime('%B')
+        ws.cell(row=row_offset, column=1).value = f"Month {period} ({month_name})"
+        row_offset += 1
+
+        # Insert headers for the period
+        ws.cell(row=row_offset, column=1).value = "Stocks"
+        ws.cell(row=row_offset, column=2).value = "Shares to Buy"
+
+        row_offset += 1  # Move to the next row to start listing stocks
+
+        # Call the VBA function to get shares to buy for the period
+        for i, stock in enumerate(stocks, start=row_offset):
+            ws.cell(row=i, column=1).value = stock
+            ws.cell(row=i, column=2).value = f'=INDEX(CalculateSharesToBuy({stocks_range}, {weights_range}, {prices_range}, {current_shares_range}, {surplus}, {fee}), {i-row_offset+1})'
+
+        # Update row_offset for the next period, accounting for the stocks listed in this period plus two rows for spacing
+        row_offset += len(stocks) + 2
+
+    # Save the changes to a BytesIO object to send as a response
     output = BytesIO()
-    workbook = xlsxwriter.Workbook(output)
-    worksheet = workbook.add_worksheet("Investment Plan")
-
-    # Add table headers
-    worksheet.write("A1", "Stocks")
-    worksheet.write("B1", "Target Allocation (%)")
-    worksheet.write("C1", "Target Allocation (shares)")
-    worksheet.write("D1", "Current shares")
-    worksheet.write("E1", "Shares to Buy")
-
-    # Write data
-    for i, stock in enumerate(stocks):
-        print(len(stocks))
-        print(len(target_percentages))
-        print(len(target_shares))
-        print(len(current_shares))
-        print(len(shares_to_buy))
-
-        if not all(len(lst) == len(stocks) for lst in [target_percentages, target_shares, current_shares, shares_to_buy]):
-            return jsonify({"error": "Mismatch in input data lengths."}), 400
-
-        worksheet.write(i + 1, 0, stock)
-        worksheet.write(i + 1, 1, target_percentages[i])
-        worksheet.write(i + 1, 2, target_shares[i])
-        worksheet.write(i + 1, 3, current_shares[i])
-        worksheet.write(i + 1, 4, shares_to_buy[i])
-
-    workbook.close()
+    wb.save(output)
     output.seek(0)
 
-    response = app.response_class(output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response.headers['Content-Disposition'] = 'attachment; filename=OptiFolio Investment Plan.xlsx'
+    response = Response(output.getvalue(), mimetype='application/vnd.ms-excel.sheet.macroEnabled.12')
+    response.headers['Content-Disposition'] = 'attachment; filename=OptiFolio Investment Plan.xlsm'
     return response
 
 if __name__ == '__main__':

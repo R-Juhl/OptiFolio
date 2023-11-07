@@ -1,34 +1,31 @@
 Todo:
 
-
 -----Next up-----
 
-Add invest plan excel download
-*lots of bugs currently. Different lengths for the variables sent to endpoint. What is most weird is that it varies.
+
+Invest plan
+- migrate to optimal portfolio from tangency, and ensure correct mapping
+- fix shares to buy error, same as total target
+- fix to work with VBA. Reference top current shares prices as will always be correct ref at any point in time
+- develop more sophisticated functions for minimizing fee in monthly orders (think multiple periods ahead for this, in batches?)
+- Design and formatting
 
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
 
-
-
-Current vs target portfolio pie chart comparison/illustration side-by-side
+fix second hustom-hr width (not sure why it is different, must be inside more narrow container. Investigate)
 
 Remove investplan component when user makes changes to portfolio?
 *currently some bugs
 
-Transition from tangency portfolio as default to TargetPortfolio:
-Add RRA levels into the app using the risk-slider
-User will be able to chose portfolios from the frontier depending on their chosen risk aversian (RRA) level
-*Make sure that current points on the frontier match with these RRA levels. Same number of points. When risk level changes the frontier updates automatically
-Move risk level down to stock selection (or below frontier perhaps?) and consider deleting experience level funct.
-*dynamic changes to the frontier illustration based on RRA
-
-Fix countdown gpt error to display on UI w. time-to-next-query
-
-
+Responsive design: Change containers and other content to % width, etc. for scaling w. res
 
 -----New features-----
 
+Fix countdown gpt error to display on UI w. time-to-next-query
+
 Improve excel invest plan
+
+Current vs target portfolio pie chart comparison/illustration side-by-side
 
 Move long messages (popups) from .js to separate doc and load from .js (if possible) ??
 
@@ -47,6 +44,8 @@ Links and popups on legend text/elements
 
 
 -----Bugs and fixes-----
+
+fix endpoints being hit/reached multiple times )/api/generate-excel and /api/get-stock-prices , maybe more)
 
 Error when making quick selection changes (multiple)
 
@@ -70,14 +69,15 @@ add width limit to available bucket of stocks and instead skip to next line
 Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates
 also the exp ret and vol, and weights are affected
 
------Finalization-----
 
-Build app and deploy on Cloud (V1.0)
+-----Finalization v1.0-----
+
+Build app and deploy on Cloud (v1.0)
 *environment variables for API endpoints
 *deploy on DigitalOcean
 
 
------V1.0+-----
+-----v1.0+-----
 
 Add maximization of data range option/button. Extend start date to earliest IPO of stock selection. End date to most recent data.
 
@@ -92,3 +92,6 @@ Add optional BTC % allocation to portfolio
 Implement "risk-free" rate
 
 Incorporate easy upload of portfolio to adjust weights based on more recent historical data
+
+More functionality and user-configuration of Invest. plan
+* specify periods, time between, increase in surplus (and part of excel file), etc.

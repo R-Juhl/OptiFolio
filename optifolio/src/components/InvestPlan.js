@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
+function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
   const [capital, setCapital] = useState('');
   const [monthlySurplus, setMonthlySurplus] = useState('');
   const [transFee, setTransFee] = useState('');
   const [shareCounts, setShareCounts] = useState({});
-
   const [stockPrices, setStockPrices] = useState({});
   const [stocksToBuy, setStocksToBuy] = useState([]);
 
@@ -15,13 +14,60 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
     setShareCounts(prevCounts => ({ ...prevCounts, [stock]: value }));
   }
 
+  const computeMonthlyInvestment = () => {
+    let monthlyInvestment = [];
+    let surplus = parseFloat(monthlySurplus);
+    let transactionCosts = parseFloat(transFee || 0);
+
+    for (let period = 0; period < 10; period++) {
+      let monthlyBuyList = prioritizeStocksLogic(filteredStocks, filteredWeights, stockPrices, shareCounts, surplus, transactionCosts);
+      monthlyInvestment.push(monthlyBuyList);
+    }
+    return monthlyInvestment;
+  };
+  
+  const prioritizeStocksLogic = (stocks, weights, prices, currentShares, surplus, fee) => {
+    let currentPortfolioValue = 0;
+    let totalTargetValue = 0;
+    let monthlyBuyList = [];
+  
+    // Calculate current portfolio value
+    stocks.forEach((stock, i) => {
+      currentPortfolioValue += (currentShares[stock] || 0) * (prices[stock] || 0);
+    });
+  
+    // Calculate total target value including surplus
+    totalTargetValue = currentPortfolioValue + surplus - (fee * stocks.length);
+  
+    // Calculate shares to buy based on target weights
+    stocks.forEach((stock, i) => {
+      const targetValue = weights[i] * totalTargetValue;
+      const currentValue = (currentShares[stock] || 0) * (prices[stock] || 0);
+      const valueToBuy = Math.max(0, targetValue - currentValue - fee);
+      const sharesToBuy = Math.floor(valueToBuy / prices[stock]);
+  
+      monthlyBuyList.push({
+        stock: stock,
+        sharesToBuy: sharesToBuy,
+        currentPrice: prices[stock],
+      });
+    });
+  
+    return monthlyBuyList;
+  };
+
   const downloadExcel = () => {
+    const monthlyInvestmentPlan = computeMonthlyInvestment();
     const payload = {
-      stocks: selectedStocks,
+      stocks: filteredStocks,
+      currentPrices: filteredStocks.map(stock => stockPrices[stock] || 0),
+      surplus: monthlySurplus,
+      fee: transFee,
       targetPercentages: stocksToBuy.map(s => s.targetPercentage),
-      targetShares: stocksToBuy.map(s => s.shares),  // You might need to calculate this
-      currentShares: selectedStocks.map(stock => shareCounts[stock] || 0),
-      sharesToBuy: stocksToBuy.map(s => s.shares)
+      targetShares: stocksToBuy.map(s => s.shares),
+      currentShares: filteredStocks.map(stock => shareCounts[stock] || 0),
+      sharesToBuy: stocksToBuy.map(s => s.shares),
+      monthlyInvestmentPlan: monthlyInvestmentPlan,
     };
 
     axios.post('http://localhost:5000/api/generate-excel', payload, {
@@ -30,15 +76,15 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'Optifolio Investment Plan.xlsx');
+      link.setAttribute('download', 'Optifolio Investment Plan.xlsm');
       document.body.appendChild(link);
       link.click();
     });
   }
 
   useEffect(() => {
-    if (selectedStocks.length > 0) {
-      axios.post('http://localhost:5000/api/get-stock-prices', { stocks: selectedStocks })
+    if (filteredStocks.length > 0) {
+      axios.post('http://localhost:5000/api/get-stock-prices', { stocks: filteredStocks })
         .then(response => {
           setStockPrices(response.data.prices);
         }).catch(error => {
@@ -48,41 +94,53 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
           }
         });
     }
-  }, [selectedStocks]);
+  }, [filteredStocks]);
 
   useEffect(() => {
-    let remainingCapital = parseFloat(capital || 0);
+    let remainingCapital = parseFloat(capital || 0) - filteredStocks.length * parseFloat(transFee || 0);
     let stocksBuyList = [];
-
-    selectedStocks.forEach((stock, index) => {
-      const targetWeight = portfolioWeights[index];
-      if (targetWeight > 0) {
-        if (stockPrices[stock] === undefined || stockPrices[stock] === 0) {
-          console.error(`Price for stock ${stock} is not available or is zero.`);
-          return;
-        }
-        const targetValue = remainingCapital * targetWeight;
-        const shares = Math.floor((targetValue - (shareCounts[stock] || 0) * stockPrices[stock]) / stockPrices[stock]);
-        stocksBuyList.push({ stock, targetPercentage: targetWeight * 100, shares });
-        remainingCapital -= shares * stockPrices[stock];
-      }
+    let totalPortfolioTargetValue = remainingCapital;
+  
+    // First calculate the total value for the target allocation
+    filteredStocks.forEach((stock, index) => {
+      const targetWeight = filteredWeights[index];
+      totalPortfolioTargetValue += (shareCounts[stock] || 0) * stockPrices[stock];
     });
-
+  
+    // Now calculate the target shares based on the target allocation
+    filteredStocks.forEach((stock, index) => {
+      const targetWeight = filteredWeights[index];
+      const targetValue = totalPortfolioTargetValue * targetWeight;
+      const targetShares = Math.floor(targetValue / (stockPrices[stock] + parseFloat(transFee || 0)));
+      const currentSharesOwned = shareCounts[stock] || 0;
+      const sharesToBuy = Math.max(0, targetShares - currentSharesOwned); // Cannot buy negative shares
+  
+      stocksBuyList.push({
+        stock,
+        targetPercentage: targetWeight * 100,
+        shares: targetShares, // This is the target allocation in shares
+        sharesToBuy: sharesToBuy // This is the number of shares to buy to reach the target
+      });
+  
+      // The remaining capital is reduced by the cost of shares to buy, not target shares
+      remainingCapital -= sharesToBuy * (stockPrices[stock] + parseFloat(transFee || 0));
+    });
+  
     // Allocate remaining capital
     while (remainingCapital > 0) {
       let allocated = false;
       for (let i = 0; i < stocksBuyList.length; i++) {
-        if (remainingCapital >= stockPrices[stocksBuyList[i].stock]) {
-          stocksBuyList[i].shares += 1;
-          remainingCapital -= stockPrices[stocksBuyList[i].stock];
+        if (remainingCapital >= (stockPrices[stocksBuyList[i].stock] + parseFloat(transFee || 0))) {
+          stocksBuyList[i].sharesToBuy += 1;
+          remainingCapital -= (stockPrices[stocksBuyList[i].stock] + parseFloat(transFee || 0));
           allocated = true;
         }
       }
-      if (!allocated) break;  // If no shares can be bought with the remaining capital
+      if (!allocated) break; // If no shares can be bought with the remaining capital
     }
-
+  
     setStocksToBuy(stocksBuyList);
-  }, [capital, shareCounts, stockPrices]);
+  }, [capital, shareCounts, stockPrices, filteredStocks, filteredWeights, transFee]);
 
   return (
     <div className="Sec">
@@ -130,9 +188,7 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
           </thead>
           <tbody>
           { optimalPortfolio && 
-            selectedStocks
-              .filter((stock, index) => portfolioWeights[index] > 0)
-              .map((stock, index) => (
+            filteredStocks.map((stock, index) => (
               <tr key={stock}>
                 <td>{stock}</td>
                 <td>
@@ -140,6 +196,7 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
                     type="number"
                     value={shareCounts[stock] || 0}
                     onChange={e => handleShareChange(stock, e.target.value)}
+                    min="0"
                   />
                 </td>
               </tr>
@@ -169,6 +226,8 @@ function InvestPlan({ optimalPortfolio, selectedStocks, portfolioWeights }) {
         </table>
       </div>
       <button className="main-button" onClick={downloadExcel}>Download Investment Plan (Excel)</button>
+      <p>This is a macro-enabled Excel Workbook. You will need to enable macros for it to work.</p>
+        <p>I assure you that it does not present any security risks. Trust be bro.</p>
     </div>
   );
 }
