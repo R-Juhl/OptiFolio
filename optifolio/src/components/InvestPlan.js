@@ -9,6 +9,7 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
   const [stockPrices, setStockPrices] = useState({});
   const [stocksToBuy, setStocksToBuy] = useState([]);
 
+  
   // Function to handle share count input change
   const handleShareChange = (stock, value) => {
     setShareCounts(prevCounts => ({ ...prevCounts, [stock]: value }));
@@ -37,20 +38,44 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
     });
   
     // Calculate total target value including surplus
-    totalTargetValue = currentPortfolioValue + surplus - (fee * stocks.length);
+    totalTargetValue = currentPortfolioValue + surplus;
   
-    // Calculate shares to buy based on target weights
+    // Calculate initial shares to buy without considering transaction fees
     stocks.forEach((stock, i) => {
       const targetValue = weights[i] * totalTargetValue;
       const currentValue = (currentShares[stock] || 0) * (prices[stock] || 0);
-      const valueToBuy = Math.max(0, targetValue - currentValue - fee);
-      const sharesToBuy = Math.floor(valueToBuy / prices[stock]);
-  
+      const valueToBuy = Math.max(0, targetValue - currentValue);
+      const sharesToBuyWithoutFees = Math.floor(valueToBuy / prices[stock]);
+
       monthlyBuyList.push({
         stock: stock,
-        sharesToBuy: sharesToBuy,
+        sharesToBuy: sharesToBuyWithoutFees,
         currentPrice: prices[stock],
       });
+    });
+
+    // Calculate total transaction fees based on the number of stocks with shares to buy > 0
+    let transactionFees = monthlyBuyList.filter(item => item.sharesToBuy > 0).length * fee;
+
+    // Deduct transaction fees from surplus
+    surplus -= transactionFees;
+
+    // Adjust total target value considering the surplus after transaction fees
+    totalTargetValue = currentPortfolioValue + surplus;
+
+    // Recalculate shares to buy with the adjusted surplus
+    monthlyBuyList = monthlyBuyList.map(item => {
+      const targetValue = weights[stocks.indexOf(item.stock)] * totalTargetValue;
+      const currentValue = (currentShares[item.stock] || 0) * (prices[item.stock] || 0);
+      const valueToBuy = Math.max(0, targetValue - currentValue);
+      // Recalculate considering the fee deduction, ensuring not to buy if insufficient funds for fees
+      const maxAffordableShares = Math.floor((surplus + currentValue) / (prices[item.stock] + (item.sharesToBuy > 0 ? fee : 0)));
+      const sharesToBuy = Math.min(maxAffordableShares, Math.floor(valueToBuy / prices[item.stock]));
+      
+      return {
+        ...item,
+        sharesToBuy: sharesToBuy
+      };
     });
   
     return monthlyBuyList;
@@ -97,34 +122,35 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
   }, [filteredStocks]);
 
   useEffect(() => {
-    let remainingCapital = parseFloat(capital || 0) - filteredStocks.length * parseFloat(transFee || 0);
+    let remainingCapital = parseFloat(capital || 0);
     let stocksBuyList = [];
-    let totalPortfolioTargetValue = remainingCapital;
+    let totalPortfolioTargetValue = 0;
   
     // First calculate the total value for the target allocation
     filteredStocks.forEach((stock, index) => {
-      const targetWeight = filteredWeights[index];
       totalPortfolioTargetValue += (shareCounts[stock] || 0) * stockPrices[stock];
     });
-  
-    // Now calculate the target shares based on the target allocation
+
+    totalPortfolioTargetValue += remainingCapital; // Include initial capital in the target portfolio value
+    
+    // Calculate the target shares based on the target allocation
     filteredStocks.forEach((stock, index) => {
       const targetWeight = filteredWeights[index];
       const targetValue = totalPortfolioTargetValue * targetWeight;
-      const targetShares = Math.floor(targetValue / (stockPrices[stock] + parseFloat(transFee || 0)));
       const currentSharesOwned = shareCounts[stock] || 0;
+      const targetShares = Math.floor(targetValue / stockPrices[stock]);
       const sharesToBuy = Math.max(0, targetShares - currentSharesOwned); // Cannot buy negative shares
   
       stocksBuyList.push({
         stock,
         targetPercentage: targetWeight * 100,
-        shares: targetShares, // This is the target allocation in shares
-        sharesToBuy: sharesToBuy // This is the number of shares to buy to reach the target
+        shares: sharesToBuy
       });
-  
-      // The remaining capital is reduced by the cost of shares to buy, not target shares
-      remainingCapital -= sharesToBuy * (stockPrices[stock] + parseFloat(transFee || 0));
     });
+
+    // Deduct the transaction fees from the remaining capital
+    let transactionFees = stocksBuyList.filter(item => item.shares > 0).length * parseFloat(transFee || 0);
+    remainingCapital -= transactionFees;
   
     // Allocate remaining capital
     while (remainingCapital > 0) {

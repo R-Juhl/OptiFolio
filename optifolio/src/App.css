@@ -138,12 +138,12 @@ input {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(150%, -70%);
+  transform: translate(130%, -50%);
   background-color: #EDEDED;
   color: #2D2D2D;
   padding: 20px;
   border-radius: 10px;
-  max-width: 300px;
+  max-width: 400px;
   z-index: 10;  /* Ensure it's on top */
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
@@ -152,7 +152,7 @@ input {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(115%, -50%);
+  transform: translate(130%, -50%);
   background-color: #EDEDED;
   color: #2D2D2D;
   padding: 20px;

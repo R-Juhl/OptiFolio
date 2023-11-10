@@ -5,7 +5,7 @@ import numpy as np # for numerical operations
 from scipy.optimize import minimize # for optimization
 from datetime import datetime, timedelta
 from openpyxl import load_workbook
-from openpyxl.styles import PatternFill
+from openpyxl.styles import PatternFill, Font
 from io import BytesIO
 import openai
 import os
@@ -93,8 +93,6 @@ def compute_portfolio():
         port_volatility = np.sqrt(np.dot(weights.T, np.dot(covariance_matrix, weights)))
         frontier.append({"return": port_return, "volatility": port_volatility})
 
-    # Return weights for optimal (tangency) portfolio
-    #optimal_weights = compute_optimal_portfolio(expected_returns, covariance_matrix)
     # Tangency Portfolio (highest Sharpe ratio)
     tangency_portfolio = max(frontier, key=lambda x: x["return"] / x["volatility"])
     # Individual Stock Data
@@ -224,51 +222,154 @@ def generate_excel():
     ws = wb["Investment Plan"]
 
     # Styles
-    yellow_fill = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+    orange_fill = PatternFill(start_color='ffb560', end_color='ffb560', fill_type='solid')
+    light_fill = PatternFill(start_color='6B667B', end_color='6B667B', fill_type='solid')
+    dark_fill = PatternFill(start_color='282c34', end_color='282c34', fill_type='solid')
+    header_fill = PatternFill(start_color='4D495C', end_color='4D495C', fill_type='solid')
+    red_fill = PatternFill(start_color='F27676', end_color='F27676', fill_type='solid')
+    
+    bold_orange_font = Font(bold=True, color="ffb560")
+    bold_font = Font(bold=True)
+    white_font = Font(color="EDEDED")
+    bold_white_font = Font(bold=True, color="EDEDED")
 
     # Add table headers for initial investments based on capital
-    headers = ["Stocks", "Current Price", "Target Allocation (%)", "Current shares", "Shares to Buy"]
+    headers = ["Stocks", "Current Price", "Target Allocation (%)", "Current Allocation (%)", "Current shares", "", "Monthly Surplus", "Fees (per transaction)"]
     for col_num, header in enumerate(headers, start=1):
-        ws.cell(row=1, column=col_num).value = header
+        ws.cell(row=2, column=col_num).value = header
 
     # Write initial data
-    for i, stock in enumerate(stocks, start=1):
-        row = [
-            stock,
-            round(current_prices[i-2], 1),  # Current price
-            round(target_percentages[i-2], 1),  # Target allocation %
-            float(current_shares[i-2]),  # Current shares
-            shares_to_buy[i-2]  # Shares to buy
-        ]
-        ws.append(row)  # This will add each stock's data as a new row
+    for i, stock in enumerate(stocks, start=3):
+        current_price = round(float(current_prices[i-3]), 1)
+        current_share = float(current_shares[i-3])
+
+        # Apply the light_fill style to all cells in the row except for specific columns
+        for j in range(1, len(headers) + 1):  # Assuming headers list includes all headers
+            cell = ws.cell(row=i, column=j)
+            if cell.column_letter not in ['']:  # Option to exclude columns from formatting
+                cell.fill = light_fill
+                cell.font = bold_white_font
+
+            # Now, populate the cell with value
+            if j == 1:
+                cell.value = stock
+            elif j == 2:
+                cell.value = current_price
+            elif j == 3:
+                cell.value = round(target_percentages[i-3], 1)
+            elif j == 5:
+                cell.value = current_share
+
+    # Construct the sum formula for the "Current Allocation (%)"
+    sum_formula = f"SUMPRODUCT(E3:E{len(stocks)+2}, B3:B{len(stocks)+2})"
+    
+    # Now set the formula for each "Current Allocation (%)" cell
+    for i in range(3, len(stocks) + 3):
+        allocation_formula = f"=ROUND((E{i}*B{i})/({sum_formula})*100, 1)"
+        ws.cell(row=i, column=4).value = allocation_formula
+
+    # Set surplus and fee in cell as values
+    ws['G3'] = float(surplus)
+    ws['H3'] = float(fee)
+    ws['G4'] = len(stocks)
 
     # Apply styles
-    for i in range(2, len(stocks) + 2):
-        ws.cell(row=i, column=4).fill = yellow_fill
+    ws.cell(row=3, column=7).fill = orange_fill
+    ws.cell(row=3, column=8).fill = orange_fill
+    ws.cell(row=4, column=7).fill = red_fill #change this to instead hide the text (len(stocks))
+
+    for i in range(3, len(stocks) + 3):
+        ws.cell(row=i, column=5).fill = orange_fill
 
     # Define ranges for the VBA function
-    stocks_range = f"A2:A{len(stocks)+1}"
-    prices_range = f"B2:B{len(stocks)+1}"
-    weights_range = f"C2:C{len(stocks)+1}"
-    current_shares_range = f"D2:D{len(stocks)+1}"
+    stocks_range = f"A3:A{len(stocks)+2}"
+    prices_range = f"B3:B{len(stocks)+2}"
+    weights_range = f"C3:C{len(stocks)+2}"
+    current_shares_range = f"E3:E{len(stocks)+2}"
+
+    # color style for offset/spacing
+    row_offset = len(stocks) + 3
+    for col in range(1, 9):  # Columns A to H
+        ws.cell(row=row_offset, column=col).fill = dark_fill
+    row_offset += 1
+    for col in range(1, 9):  # Columns A to H
+        ws.cell(row=row_offset, column=col).fill = dark_fill
+    row_offset += 1
+    
+    # Write initial buy period
+    month_name = datetime(1900, (current_month - 1) % 12 + 1, 1).strftime('%B')
+    for col in range(1, 9):  # This will fill cells from A to H
+        cell = ws.cell(row=row_offset, column=col)
+        cell.fill = header_fill
+        cell.font = bold_orange_font
+        if col == 1:
+            cell.value = f"Initial investment ({month_name})"
+
+    row_offset += 1
+
+    for col in range(1, 9):  # This will fill cells from A to H
+        cell = ws.cell(row=row_offset, column=col)
+        cell.fill = header_fill
+        cell.font = bold_white_font
+        if col == 1:
+            cell.value = "Stocks"
+        elif col == 2:
+            cell.value = "Shares to Buy"
+
+    row_offset += 1
+
+    #for col in range(1, 9):  # This will fill cells from A to H
+    for i, stock in enumerate(stocks, start=row_offset):
+        ws.cell(row=i, column=1).value = stock
+        ws.cell(row=i, column=1).fill = light_fill
+        ws.cell(row=i, column=1).font = white_font
+        ws.cell(row=i, column=2).value = shares_to_buy[i - row_offset]
+        ws.cell(row=i, column=2).fill = light_fill
+        ws.cell(row=i, column=2).font = white_font
+
+    row_offset += len(stocks)
+
+    # color style for offset/spacing
+    for col in range(1, 9):  # Columns A to H
+        ws.cell(row=row_offset, column=col).fill = dark_fill
+    row_offset += 1
+    for col in range(1, 9):  # Columns A to H
+        ws.cell(row=row_offset, column=col).fill = dark_fill
+    row_offset += 1
 
     # Start writing monthly plan
-    row_offset = len(stocks) + 4
     for period, monthly_data in enumerate(monthly_investment_plan, start=1):
         month_name = datetime(1900, (current_month + period - 1) % 12 + 1, 1).strftime('%B')
-        ws.cell(row=row_offset, column=1).value = f"Month {period} ({month_name})"
-        row_offset += 1
+        cell = ws.cell(row=row_offset, column=1)
+        cell.value = f"Month {period} ({month_name})"
+        cell.font = bold_font
+
+    # !!! missing monthly period titles !!!
 
         # Insert headers for the period
-        ws.cell(row=row_offset, column=1).value = "Stocks"
-        ws.cell(row=row_offset, column=2).value = "Shares to Buy"
-
-        row_offset += 1  # Move to the next row to start listing stocks
+        for col in range(1, 9):  # This will fill cells from A to H
+            cell = ws.cell(row=row_offset, column=col)
+            cell.fill = header_fill
+            cell.font = bold_white_font
+            if col == 1:
+                cell.value = "Stocks"
+            elif col == 2:
+                cell.value = "Shares to Buy"
+        
+        row_offset += 1
 
         # Call the VBA function to get shares to buy for the period
         for i, stock in enumerate(stocks, start=row_offset):
-            ws.cell(row=i, column=1).value = stock
-            ws.cell(row=i, column=2).value = f'=INDEX(CalculateSharesToBuy({stocks_range}, {weights_range}, {prices_range}, {current_shares_range}, {surplus}, {fee}), {i-row_offset+1})'
+            for col in range(1, 9):  # This will fill cells from A to H
+                cell = ws.cell(row=row_offset, column=col)
+                if col == 1:
+                    cell.fill = light_fill
+                    cell.font = white_font
+                    ws.cell(row=i, column=1).value = stock
+                elif col == 2:
+                    cell.fill = light_fill
+                    cell.font = white_font
+                    ws.cell(row=i, column=2).value = f'=INDEX(CalculateSharesToBuy({stocks_range}, {weights_range}, {prices_range}, {current_shares_range}, {surplus}, {fee}), {i-row_offset+1})'
 
         # Update row_offset for the next period, accounting for the stocks listed in this period plus two rows for spacing
         row_offset += len(stocks) + 2

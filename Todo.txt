@@ -1,16 +1,21 @@
-Todo:
-
 -----Next up-----
 
-
 Invest plan
-- migrate to optimal portfolio from tangency, and ensure correct mapping
-- fix shares to buy error, same as total target
-- fix to work with VBA. Reference top current shares prices as will always be correct ref at any point in time
-- develop more sophisticated functions for minimizing fee in monthly orders (think multiple periods ahead for this, in batches?)
+- Fix Recompute button to recompute initial plus all subsequent periods
+    *should take changes in Current shares, monthly surplus, stock prices, and fees into account
+- Fix initial shares to buy function not calculating correctly based off fees in investplan.js comp.
+    *needs to match method in calculatesharestobuy function and recompute from excel vba
 - Design and formatting
+    Fix named range problem for current portfolio pie chart
+    Intro/instructions text above "Overview" table
+    Coloring (background, periods, charts, intro, overview, etc.), hide uncesseary data, bold text titles, etc.
+    Add net shares column to periods, and a funds required column
+    add total row for each period
+    make printable (define section(s)) ?
 
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
+
+Remove shares to buy table from UI and have it exclusively on the Excel Invest Plan?
 
 fix second hustom-hr width (not sure why it is different, must be inside more narrow container. Investigate)
 
@@ -19,58 +24,20 @@ Remove investplan component when user makes changes to portfolio?
 
 Responsive design: Change containers and other content to % width, etc. for scaling w. res
 
------New features-----
-
-Fix countdown gpt error to display on UI w. time-to-next-query
-
-Improve excel invest plan
-
-Current vs target portfolio pie chart comparison/illustration side-by-side
-
 Move long messages (popups) from .js to separate doc and load from .js (if possible) ??
 
-Fix hover zoom on pie chart. Ideally to zoom on slices w. label popup if possible
-
-Add budgeting functionality.
-Monthly budget to invest in stocks
-Current portfolio input option (otherwise default to 0). Holdings of other stocks than optimal (chosen portfolio) ignored.
-Add option to add custom transaction costs per stock purchase (broker fees)
-Then use all this data to output table w. stock purchase plan per month. Also add functionality to download as excel for offline use
-
-Add lifecycle functionality to budgeting element. Option for user to specify increase in risk aversion that scales with time based on time to retirement
-*Will be incorporated in stock purchase plan
-
-Links and popups on legend text/elements
+Add method of updating stock prices in invest plan
 
 
 -----Bugs and fixes-----
 
-fix endpoints being hit/reached multiple times )/api/generate-excel and /api/get-stock-prices , maybe more)
+pie chart and weights sometimes not rendering
 
-Error when making quick selection changes (multiple)
-
-Fix bug with incorrect computations and resulting weights when adding specific tickers and/or changing date range
-It seems very clear that the pie chart and its legends weights are sometimes incorrect. Try TSLA+META for example. Opposite weights.
-
-Also a problem where it seems weights are computed correctly for a tangency portfolio, but the legend for the pie chart indicates, for instance, 100% allocation to a stock when this is clearly not the case
-
-Also many scenarios where it does not automatically recompute and redisplay outputs. Test app for these.
-
-Adjust user fascing error messaging behavior. Different scenarios, multiple error handling, etc.
-
-Fix bug with Reach Hook useCallback missing a dependency
-Implement useCallback: const computeOptimalPortfolio = useCallback(async (currentController) => {
-And add dependencies: , [selectedStocks, startDate, endDate]);
-And fix the bugs that then occur. Something for a rainy day.
-
-add width limit to available bucket of stocks and instead skip to next line
-* maybe add some background vis to highlight the bucket too
-
-Sometimes a bug with the output weights (seems to only be the pie chart and its legend) when switching around between different stocks and dates
-also the exp ret and vol, and weights are affected
 
 
 -----Finalization v1.0-----
+
+Remove/edit notes in all code for production (py, js, html, css, VBA)
 
 Build app and deploy on Cloud (v1.0)
 *environment variables for API endpoints
@@ -79,19 +46,52 @@ Build app and deploy on Cloud (v1.0)
 
 -----v1.0+-----
 
+Fix countdown gpt error to display on UI w. time-to-next-query
+
+Current vs target portfolio pie chart comparison/illustration side-by-side in UI same as excel?
+
+Fix hover zoom on pie chart. Ideally to zoom on slices w. label popup if possible
+
+VBA code:
+- add period selector using drop-down w. vba in invest plan and dynamically change the appearance and function of invest plan
+- more logic to handle low surplus amounts by batching purchases, etc.
+- develop more sophisticated functions/algoritms for minimizing fees in monthly orders (batching purchases through multi-period planning (need solver??))
+- restructure everyting, what is saved in cells, what vba should handle what functions, etc. (regarding fees, surplus, stock prices, etc.)
+
+Add lifecycle functionality to budgeting element. Option for user to specify increase in risk aversion that scales with time based on time to retirement
+*Will be incorporated in stock purchase plan
+
+Links and popups on legend text/elements
+
 Add maximization of data range option/button. Extend start date to earliest IPO of stock selection. End date to most recent data.
 
 Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
+*probably will need GPT prompting to find relevant data sources for whatever stock the user wants to research
 
 Add shorting option
 *How to modify pie chart illustration??
+*Bar graph?
 
 Add optional BTC % allocation to portfolio
 *Create and link to a blog page (on app or my website) that details why this is a sound decision
 
 Implement "risk-free" rate
 
-Incorporate easy upload of portfolio to adjust weights based on more recent historical data
-
 More functionality and user-configuration of Invest. plan
 * specify periods, time between, increase in surplus (and part of excel file), etc.
+
+
+-----Bugs and fixes-----
+
+fix endpoints being hit/reached multiple times /api/generate-excel and /api/get-stock-prices , maybe more
+
+Error when making quick selection changes (multiple)
+
+Also many scenarios where it does not automatically recompute and redisplay outputs. Test app for these.
+
+Adjust user fascing error messaging behavior. Different scenarios, multiple error handling, etc.
+
+Fix bug with Reach Hook useCallback missing dependencies
+Implement useCallback: const computeOptimalPortfolio = useCallback(async (currentController) => {
+And add dependencies: , [selectedStocks, startDate, endDate]);
+And fix the bugs that then occur. Something for a rainy day.
