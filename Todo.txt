@@ -12,6 +12,9 @@ Invest plan
     Add net shares column to periods, and a funds required column
     add total row for each period
     make printable (define section(s)) ?
+    locked cells?
+
+pie chart and weights sometimes not rendering
 
 Add graph showing expected capital from now until retirement or some x years into future based on exp ret.
 
@@ -30,8 +33,6 @@ Add method of updating stock prices in invest plan
 
 
 -----Bugs and fixes-----
-
-pie chart and weights sometimes not rendering
 
 
 
@@ -78,7 +79,7 @@ Add optional BTC % allocation to portfolio
 Implement "risk-free" rate
 
 More functionality and user-configuration of Invest. plan
-* specify periods, time between, increase in surplus (and part of excel file), etc.
+* specify (curent) periods, time between, increase in surplus (and part of excel file), etc.
 
 
 -----Bugs and fixes-----

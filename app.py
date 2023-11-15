@@ -244,7 +244,7 @@ def generate_excel():
         current_share = float(current_shares[i-3])
 
         # Apply the light_fill style to all cells in the row except for specific columns
-        for j in range(1, len(headers) + 1):  # Assuming headers list includes all headers
+        for j in range(1, len(headers) + 1):
             cell = ws.cell(row=i, column=j)
             if cell.column_letter not in ['']:  # Option to exclude columns from formatting
                 cell.fill = light_fill
@@ -318,18 +318,16 @@ def generate_excel():
 
     row_offset += 1
 
-    #for col in range(1, 9):  # This will fill cells from A to H
     for i, stock in enumerate(stocks, start=row_offset):
         ws.cell(row=i, column=1).value = stock
-        ws.cell(row=i, column=1).fill = light_fill
-        ws.cell(row=i, column=1).font = white_font
         ws.cell(row=i, column=2).value = shares_to_buy[i - row_offset]
-        ws.cell(row=i, column=2).fill = light_fill
-        ws.cell(row=i, column=2).font = white_font
-
-    row_offset += len(stocks)
+        for col in range(1, 9):  # This will fill cells from A to H
+            cell = ws.cell(row=i, column=col)
+            cell.fill = light_fill
+            cell.font = white_font
 
     # color style for offset/spacing
+    row_offset += len(stocks)
     for col in range(1, 9):  # Columns A to H
         ws.cell(row=row_offset, column=col).fill = dark_fill
     row_offset += 1
@@ -342,9 +340,11 @@ def generate_excel():
         month_name = datetime(1900, (current_month + period - 1) % 12 + 1, 1).strftime('%B')
         cell = ws.cell(row=row_offset, column=1)
         cell.value = f"Month {period} ({month_name})"
-        cell.font = bold_font
-
-    # !!! missing monthly period titles !!!
+        for col in range(1, 9):  # This will fill cells from A to H
+            cell = ws.cell(row=row_offset, column=col)
+            cell.fill = header_fill
+            cell.font = bold_orange_font
+        row_offset += 1
 
         # Insert headers for the period
         for col in range(1, 9):  # This will fill cells from A to H
@@ -355,24 +355,24 @@ def generate_excel():
                 cell.value = "Stocks"
             elif col == 2:
                 cell.value = "Shares to Buy"
-        
         row_offset += 1
 
         # Call the VBA function to get shares to buy for the period
         for i, stock in enumerate(stocks, start=row_offset):
+            ws.cell(row=i, column=1).value = stock
+            ws.cell(row=i, column=2).value = f'=INDEX(CalculateSharesToBuy({stocks_range}, {weights_range}, {prices_range}, {current_shares_range}, {surplus}, {fee}), {i-row_offset+1})'
             for col in range(1, 9):  # This will fill cells from A to H
-                cell = ws.cell(row=row_offset, column=col)
-                if col == 1:
-                    cell.fill = light_fill
-                    cell.font = white_font
-                    ws.cell(row=i, column=1).value = stock
-                elif col == 2:
-                    cell.fill = light_fill
-                    cell.font = white_font
-                    ws.cell(row=i, column=2).value = f'=INDEX(CalculateSharesToBuy({stocks_range}, {weights_range}, {prices_range}, {current_shares_range}, {surplus}, {fee}), {i-row_offset+1})'
-
-        # Update row_offset for the next period, accounting for the stocks listed in this period plus two rows for spacing
-        row_offset += len(stocks) + 2
+                cell = ws.cell(row=i, column=col)
+                cell.fill = light_fill
+                cell.font = white_font
+    
+        row_offset += len(stocks) + 0 # adjust?
+        for col in range(1, 9):  # Columns A to H
+            ws.cell(row=row_offset, column=col).fill = dark_fill
+        row_offset += 1
+        for col in range(1, 9):  # Columns A to H
+            ws.cell(row=row_offset, column=col).fill = dark_fill
+        row_offset += 1
 
     # Save the changes to a BytesIO object to send as a response
     output = BytesIO()
