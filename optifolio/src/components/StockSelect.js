@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { popupTextHow } from './PopupText';
 
 function StockSelect(props) {
   const { selectedStocks, setSelectedStocks, portfolioWeights, setPortfolioWeights, tangencyPortfolio, setTangencyPortfolio, optimalPortfolio, setOptimalPortfolio } = props;
@@ -13,9 +14,7 @@ function StockSelect(props) {
   const [startDate, setStartDate] = useState("2015-01");
   const [endDate, setEndDate] = useState("2023-01");
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
-  
   const [sortedSelectedStocks, setSortedSelectedStocks] = useState([]);
-  
   const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
   const [stockError, setStockError] = useState('');
   const [dateRangeError, setDateRangeError] = useState('');
@@ -130,7 +129,8 @@ function StockSelect(props) {
       setPortfolioWeights(weightsMapping);
       setEfficientFrontier(data.frontier);
       setTangencyPortfolio(data.tangency);
-      setOptimalPortfolio(data.optimalPortfolio); // Set optimal portfolio for use in InvestPlan
+      setOptimalPortfolio(data.optimalPortfolio); // optimal portfolio for use in InvestPlan
+      setSortedSelectedStocks(sortedSelectedStocks);
       setIndividualStocks(data.stocks);
       setMinVariancePortfolio(data.min_variance);
       setHasClickedButton(true);
@@ -204,7 +204,7 @@ function StockSelect(props) {
     }
   }
 
-  function PortfolioTable({ tangencyPortfolio, individualStocks }) {
+  function PortfolioTable({ optimalPortfolio, individualStocks }) {
     return (
       <div className="portfolio-table-container">
         <table className="portfolio-table">
@@ -363,7 +363,6 @@ function StockSelect(props) {
       
     
       {
-        //portfolioWeights && portfolioWeights.length === selectedStocks.length && (
         portfolioWeights && Object.keys(portfolioWeights).length === selectedStocks.length && (
           <div className="chart-container">
 
@@ -377,12 +376,10 @@ function StockSelect(props) {
             {showMethod && (
               <div className="method-popup">
                 <button className="close-button" onClick={() => setShowMethod(false)}>X</button>
-                <h3>How Does This Work?</h3>
-                <p>When you select a set of stocks, this app dives into their historical data to understand how they have performed in the past. Using this information, it then calculates the "best mix" of these stocks to create a portfolio that offers the highest return for a given level of risk.</p>
-                <p>It does this by employing the principles of Modern Portfolio Theory (MPT). Specifically, it uses Mean-Variance Optimization to derive the Efficient Frontier. Risk levels are incorporated using Relative Risk Aversion (RRA) levels.</p>
-                <p>Imagine you're assembling a musical band with a mix of instruments like guitars, drums, and keyboards. You want the right balance, so every song they play strikes the perfect chord and harmony. Similarly, this app ensures that your portfolio has the right balance of stocks, so your investments work together in harmony, each complementing the other.</p>
-                <p>The curve you see is the Efficient Frontier. It represents the optimal portfolios that offer the highest expected return for a given level of risk. But how do you translate this into actionable investment decisions? The Pie Chart below it breaks down the optimal portfolio for the specified risk-level by displaying the proportion, or weight, of each selected stock. In essence, it visualizes how you might distribute your investments among these stocks for the best risk-return trade-off.</p>
-                <p>Lastly, the table beneath provides a detailed look at the expected annual return and volatility of each individual stock and the optimal portfolio. It's a way to quantify the potential performance of each asset and the combined portfolio.</p>
+                <h3>{popupTextHow.title}</h3>
+                {popupTextHow.content.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
               </div>
             )}
 
@@ -473,7 +470,7 @@ function StockSelect(props) {
             </div>
             {/* PortfolioTable */}
             {
-              tangencyPortfolio && individualStocks.length > 0 && (
+              optimalPortfolio && individualStocks.length > 0 && (
                 <PortfolioTable 
                   optimalPortfolio={optimalPortfolio} 
                   individualStocks={individualStocks} 

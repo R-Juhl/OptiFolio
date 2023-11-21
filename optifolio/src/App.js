@@ -9,6 +9,9 @@ function App() {
   const [showInvestPlan, setShowInvestPlan] = useState(false);
 
   const [selectedStocks, setSelectedStocks] = useState([]);
+
+  const [sortedSelectedStocks, setSortedSelectedStocks] = useState([]);
+
   const [tangencyPortfolio, setTangencyPortfolio] = useState(null);
   const [optimalPortfolio, setOptimalPortfolio] = useState(null);
   const [portfolioWeights, setPortfolioWeights] = useState(null);
@@ -53,6 +56,8 @@ function App() {
           onGenerateInvestPlanClick={handleGenerateInvestPlanClick}
           selectedStocks={selectedStocks} 
           setSelectedStocks={setSelectedStocks}
+          sortedSelectedStocks={sortedSelectedStocks}
+          setSortedSelectedStocks={setSortedSelectedStocks}
           tangencyPortfolio={tangencyPortfolio}
           setTangencyPortfolio={setTangencyPortfolio}
           optimalPortfolio={optimalPortfolio}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import logo from '../images/logo.svg';
+import { popupTextDisclaimer } from './PopupText';
 
 function Welcome(props) {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -24,14 +25,10 @@ function Welcome(props) {
       {showDisclaimer && (
         <div className="disclaimer-popup">
           <button className="close-button" onClick={() => setShowDisclaimer(false)}>X</button>
-          <p>Nothing in this application is financial advice. Always conduct your own research
-            and/or consult with a financial advisor before making any investment decisions.</p>
-          <p>Think of this application as the "magic 8-ball" of stock portfolios!
-            While it might provide some interesting insights and inspiration, remember that
-            building a portfolio is a bit more complex than shaking a toy for answers.
-            This tool is designed to spark ideas and offer valuable insights, but it's not
-            the "end-all-be-all" of investment strategies. So, before you go all-in based
-            on our suggestions, make sure to double-check your own research.</p>
+          <h3>{popupTextDisclaimer.title}</h3>
+          {popupTextDisclaimer.content.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
         </div>
       )}
 
