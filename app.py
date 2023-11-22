@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response, send_file
+from flask import Flask, jsonify, request, Response, send_file, send_from_directory
 from flask_cors import CORS
 import yfinance as yf # for historical stock data
 import numpy as np # for numerical operations
@@ -11,12 +11,12 @@ import openai
 import os
 api_key = os.environ.get("OPENAI_API_KEY")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../optifolio/build', static_url_path='/')
 CORS(app, origins=["http://localhost:3000"])
 
 @app.route('/')
 def index():
-    return jsonify({"message": "Welcome to OptiFolio API!"})
+    return send_from_directory(app.static_folder, 'index.html')
 
 def fetch_stock_data(stocks, start_date, end_date):
     data = yf.download(stocks, start=start_date, end=end_date)['Adj Close']
@@ -129,7 +129,7 @@ def compute_portfolio():
 def validate_stock():
     stock = request.json['stock']
     try:
-        # Try fetching data for the last 7 days as validity check (because shortName did not work for some reason)
+        # fetching data for the last 7 days as validity check (because shortName did not work for some reason)
         data = yf.download(stock, period="7d")
         if data.empty:
             raise ValueError(f"No data available for {stock}")
@@ -276,7 +276,7 @@ def generate_excel():
     # Apply styles
     ws.cell(row=3, column=7).fill = orange_fill
     ws.cell(row=3, column=8).fill = orange_fill
-    ws.cell(row=4, column=7).fill = red_fill #change this to instead hide the text (len(stocks))
+    ws.cell(row=4, column=7).fill = red_fill # change this to instead hide the text (len(stocks))
 
     for i in range(3, len(stocks) + 3):
         ws.cell(row=i, column=5).fill = orange_fill

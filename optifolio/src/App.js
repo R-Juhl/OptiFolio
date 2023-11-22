@@ -15,9 +15,6 @@ function App() {
   const [tangencyPortfolio, setTangencyPortfolio] = useState(null);
   const [optimalPortfolio, setOptimalPortfolio] = useState(null);
   const [portfolioWeights, setPortfolioWeights] = useState(null);
-
-  console.log(portfolioWeights)
-
   
   const filteredStocks = portfolioWeights 
     ? Object.keys(portfolioWeights).filter(stock => portfolioWeights[stock] > 0)

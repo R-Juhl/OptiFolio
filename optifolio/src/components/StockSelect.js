@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { popupTextHow } from './PopupText';
 
 function StockSelect(props) {
@@ -15,7 +15,7 @@ function StockSelect(props) {
   const [endDate, setEndDate] = useState("2023-01");
   const [availableStocks, setAvailableStocks] = useState(['TSLA', 'META', 'AAPL', 'AMZN']);
   const [sortedSelectedStocks, setSortedSelectedStocks] = useState([]);
-  const [newStock, setNewStock] = useState(''); // state to store user's inputted stock
+  const [newStock, setNewStock] = useState('');
   const [stockError, setStockError] = useState('');
   const [dateRangeError, setDateRangeError] = useState('');
   const [gptQuery, setGptQuery] = useState('');
@@ -278,6 +278,7 @@ function StockSelect(props) {
         <li>"Companies investing heavily in X"</li>
         <li>"Companies that have a monopoly in their respective business niche"</li>
         <li>"Companies that will succeed if X comes true"</li>
+        <li>"HELP! I believe mice will take over the world very soon. What stocks to buy?"</li>
       </ul>
 
       <div className="query-container">
@@ -360,13 +361,12 @@ function StockSelect(props) {
       <button id="getStarted" className="main-button" onClick={computeOptimalPortfolio}>
         CREATE PORTFOLIO
       </button>
+      <hr className="custom-hr" />
       
-    
       {
         portfolioWeights && Object.keys(portfolioWeights).length === selectedStocks.length && (
           <div className="chart-container">
 
-            <hr className="custom-hr" />
             <h2>Your Portfolio</h2>
 
             <button className="popup-button" onClick={() => setShowMethod(true)}>
@@ -385,8 +385,8 @@ function StockSelect(props) {
 
             {/* Container for Efficient Frontier */}
             <div className="frontier-container">
-            <ScatterChart
-                width={850}
+              <ScatterChart
+                width={800}
                 height={400}
                 margin={{ top: 50, right: 20, bottom: 20, left: 20 }}
               >

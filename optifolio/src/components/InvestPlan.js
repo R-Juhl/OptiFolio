@@ -122,52 +122,62 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
   }, [filteredStocks]);
 
   useEffect(() => {
+    //console.log('useEffect triggered');
     let remainingCapital = parseFloat(capital || 0);
     let stocksBuyList = [];
     let totalPortfolioTargetValue = 0;
   
-    // First calculate the total value for the target allocation
+    // Calculate the total value for the target allocation
     filteredStocks.forEach((stock, index) => {
-      totalPortfolioTargetValue += (shareCounts[stock] || 0) * stockPrices[stock];
+      let stockValue = (shareCounts[stock] || 0) * (stockPrices[stock] || 0);
+      totalPortfolioTargetValue += stockValue;
     });
-
-    totalPortfolioTargetValue += remainingCapital; // Include initial capital in the target portfolio value
-    
-    // Calculate the target shares based on the target allocation
+  
+    totalPortfolioTargetValue += remainingCapital;
+  
+    // Initial calculation of shares to buy without considering fees
     filteredStocks.forEach((stock, index) => {
       const targetWeight = filteredWeights[index];
       const targetValue = totalPortfolioTargetValue * targetWeight;
       const currentSharesOwned = shareCounts[stock] || 0;
       const targetShares = Math.floor(targetValue / stockPrices[stock]);
-      const sharesToBuy = Math.max(0, targetShares - currentSharesOwned); // Cannot buy negative shares
+      const sharesToBuy = Math.max(0, targetShares - currentSharesOwned);
   
       stocksBuyList.push({
         stock,
         targetPercentage: targetWeight * 100,
-        shares: sharesToBuy
+        shares: sharesToBuy,
+        buy: sharesToBuy > 0
       });
     });
-
-    // Deduct the transaction fees from the remaining capital
-    let transactionFees = stocksBuyList.filter(item => item.shares > 0).length * parseFloat(transFee || 0);
-    remainingCapital -= transactionFees;
   
-    // Allocate remaining capital
-    while (remainingCapital > 0) {
-      let allocated = false;
-      for (let i = 0; i < stocksBuyList.length; i++) {
-        if (remainingCapital >= (stockPrices[stocksBuyList[i].stock] + parseFloat(transFee || 0))) {
-          stocksBuyList[i].sharesToBuy += 1;
-          remainingCapital -= (stockPrices[stocksBuyList[i].stock] + parseFloat(transFee || 0));
-          allocated = true;
-        }
+    // Calculate total transaction fees
+    const fee = parseFloat(transFee || 0);
+    let totalFees = stocksBuyList.reduce((sum, item) => item.buy ? sum + fee : sum, 0);
+    let capitalAfterFees = remainingCapital - totalFees;
+  
+    // Proportionally adjust shares to buy to maintain target weights
+    let adjustedTotalValue = totalPortfolioTargetValue - totalFees;
+    stocksBuyList = stocksBuyList.map(item => {
+      if (item.buy) {
+        const targetValue = adjustedTotalValue * filteredWeights[filteredStocks.indexOf(item.stock)];
+        const maxAffordableValue = Math.max(0, capitalAfterFees - fee);
+        const valueToBuy = Math.min(maxAffordableValue, targetValue - (shareCounts[item.stock] || 0) * (stockPrices[item.stock] || 0));
+        item.shares = Math.max(0, Math.floor(valueToBuy / (stockPrices[item.stock] || 1)));
+        capitalAfterFees -= item.shares * (stockPrices[item.stock] || 0) + (item.shares > 0 ? fee : 0);
       }
-      if (!allocated) break; // If no shares can be bought with the remaining capital
-    }
+      return item;
+    });
   
+    //console.log('fee:', fee);
+    //console.log('Stocks to Buy:', stocksBuyList);
+    //console.log('capitalAfterFees:', capitalAfterFees);
     setStocksToBuy(stocksBuyList);
   }, [capital, shareCounts, stockPrices, filteredStocks, filteredWeights, transFee]);
+    
 
+
+  //*** Rendering Code ***// 
   return (
     <div className="Sec">
       <h2>Investment Plan</h2>
@@ -237,6 +247,7 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
             <tr>
               <th>Stock</th>
               <th>Target Allocation (%)</th>
+              <th>Share Price</th>
               <th>Shares to Buy</th>
             </tr>
           </thead>
@@ -245,6 +256,7 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
               <tr key={entry.stock}>
                 <td>{entry.stock}</td>
                 <td>{entry.targetPercentage.toFixed(2)}</td>
+                <td>{stockPrices[entry.stock]}</td>
                 <td>{entry.shares}</td>
               </tr>
             ))}
@@ -252,8 +264,8 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
         </table>
       </div>
       <button className="main-button" onClick={downloadExcel}>Download Investment Plan (Excel)</button>
-      <p>This is a macro-enabled Excel Workbook. You will need to enable macros for it to work.</p>
-        <p>I assure you that it does not present any security risks. Trust be bro.</p>
+      <p>This is a macro-enabled Excel Workbook. You will need to enable macros for it to work.
+        <br/>I assure you that it does not present any security risks. Trust be bro.</p>
     </div>
   );
 }
