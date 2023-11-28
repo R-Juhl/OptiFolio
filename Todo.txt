@@ -1,22 +1,14 @@
------Next up-----
-
-Invest plan
-- Fix Recompute button to recompute initial plus all subsequent periods
-    *should take changes in Current shares, monthly surplus, stock prices, and fees into account
-
-
------Finalization v1.0-----
-
-Remove/edit notes in all code for production (py, js, html, css, VBA)
-
-Build app and deploy on Cloud (v1.0)
-*environment variables for API endpoints
-*deploy on DigitalOcean
-
 
 -----v1.0+-----
 
+First up:
+- make dev environment workable (for instance the api base url should be localhost in dev env)
+- ssl on subdomain
+
+
 Invest Plan Excel
+- Fix Recompute button to recompute initial plus all subsequent periods
+    - should take changes in Current shares, monthly surplus, stock prices, and fees into account
 - Add method of updating stock prices in invest plan
 - VBA code:
     - add period selector using drop-down w. vba in invest plan and dynamically change the appearance and function of invest plan
@@ -43,6 +35,7 @@ Invest Plan component
     *currently some bugs
 
 General changes and fixes
+- Add favicon to production environment
 - Responsive design: Change containers and other content to % width, etc. for scaling w. res
 - Fix countdown gpt error to display on UI w. time-to-next-query
 - Add maximization of data range option/button. Extend start date to earliest IPO of stock selection. End date to most recent data.
@@ -52,6 +45,7 @@ General changes and fixes
 - Implement "risk-free" rate
 - Add research elements to the app where the user can read more about stocks based on their selection or GPT generated suggestions
     *probably will need GPT prompting to find relevant data sources for whatever stock the user wants to research
+- SSL on subdomain
 
 Visual
 - ResponsiveContainers for recharts elemements for dynamically adjusting to res

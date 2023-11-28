@@ -48,8 +48,10 @@ body {
 }
 
 .App-logo {
-  height: 20vmin;
+  height: 10vmin;
   pointer-events: none;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .title {
@@ -138,7 +140,7 @@ input {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(130%, -50%);
+  transform: translate(115%, -50%);
   background-color: #EDEDED;
   color: #2D2D2D;
   padding: 20px;
@@ -152,7 +154,7 @@ input {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(130%, -50%);
+  transform: translate(115%, -50%);
   background-color: #EDEDED;
   color: #2D2D2D;
   padding: 20px;

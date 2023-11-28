@@ -39,7 +39,7 @@ function StockSelect(props) {
 
   const checkDateRangeForStocks = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/check-daterange', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/check-daterange`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ function StockSelect(props) {
 
     try {
       const sortedSelectedStocks = [...selectedStocks].sort();
-      const response = await fetch('http://localhost:5000/api/compute-portfolio', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/compute-portfolio`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -154,7 +154,7 @@ function StockSelect(props) {
     }
 
     try {
-        const response = await fetch('http://localhost:5000/api/chat-gpt', {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/chat-gpt`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -182,7 +182,7 @@ function StockSelect(props) {
 
   const addStock = async () => {
     try {
-        const response = await fetch('http://localhost:5000/api/validate-stock', {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/validate-stock`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

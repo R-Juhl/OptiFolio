@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from '../images/logo.svg';
+import logo from '../images/logo.png';
 import { popupTextDisclaimer } from './PopupText';
 
 function Welcome(props) {
@@ -9,7 +9,7 @@ function Welcome(props) {
     <div className="Sec">
       <h2 className="title">Welcome to OptiFolio</h2>
       <img src={logo} className="App-logo" alt="logo" />
-      <p>Your go-to solution for creating an optimal stock portfolio</p>
+      <p>Your go-to solution for creating a (theoretical) optimal stock portfolio</p>
       
       <button className="popup-button" onClick={() => setShowDisclaimer(true)}>
         NFA: Read Disclaimer

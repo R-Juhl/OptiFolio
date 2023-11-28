@@ -9,10 +9,27 @@ from openpyxl.styles import PatternFill, Font
 from io import BytesIO
 import openai
 import os
+
+#for debugging:
+print("Current working directory:", os.getcwd())
+#print(app.config)
+
 api_key = os.environ.get("OPENAI_API_KEY")
 
-app = Flask(__name__, static_folder='../optifolio/build', static_url_path='/')
-CORS(app, origins=["http://localhost:3000"])
+static_folder_path = os.path.join(os.getcwd(), 'optifolio', 'build')
+app = Flask(__name__, static_folder=static_folder_path, static_url_path='/')
+#app = Flask(__name__, static_folder='../optifolio/build', static_url_path='/')
+
+cors_origin = os.environ.get("CORS_ORIGIN", "http://localhost:3000")
+CORS(app, origins=[cors_origin])
+
+@app.route('/test')
+def test():
+    return 'Test route is working!'
+
+@app.route('/test-static')
+def test_static():
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/')
 def index():
@@ -384,4 +401,4 @@ def generate_excel():
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

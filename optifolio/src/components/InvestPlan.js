@@ -95,7 +95,7 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
       monthlyInvestmentPlan: monthlyInvestmentPlan,
     };
 
-    axios.post('http://localhost:5000/api/generate-excel', payload, {
+    axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/generate-excel`, payload, {
       responseType: 'blob'
     }).then(response => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -109,7 +109,7 @@ function InvestPlan({ optimalPortfolio, filteredStocks, filteredWeights }) {
 
   useEffect(() => {
     if (filteredStocks.length > 0) {
-      axios.post('http://localhost:5000/api/get-stock-prices', { stocks: filteredStocks })
+      axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/get-stock-prices`, { stocks: filteredStocks })
         .then(response => {
           setStockPrices(response.data.prices);
         }).catch(error => {
