@@ -3,7 +3,6 @@
 
 First up:
 - make dev environment workable (for instance the api base url should be localhost in dev env)
-- ssl on subdomain
 
 
 Invest Plan Excel

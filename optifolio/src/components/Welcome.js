@@ -9,7 +9,7 @@ function Welcome(props) {
     <div className="Sec">
       <h2 className="title">Welcome to OptiFolio</h2>
       <img src={logo} className="App-logo" alt="logo" />
-      <p>Your go-to solution for creating a (theoretical) optimal stock portfolio</p>
+      <p>Your go-to solution for creating a (theoretically) optimal stock portfolio</p>
       
       <button className="popup-button" onClick={() => setShowDisclaimer(true)}>
         NFA: Read Disclaimer

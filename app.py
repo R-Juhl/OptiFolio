@@ -11,14 +11,13 @@ import openai
 import os
 
 #for debugging:
-print("Current working directory:", os.getcwd())
+#print("Current working directory:", os.getcwd())
 #print(app.config)
 
 api_key = os.environ.get("OPENAI_API_KEY")
 
 static_folder_path = os.path.join(os.getcwd(), 'optifolio', 'build')
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/')
-#app = Flask(__name__, static_folder='../optifolio/build', static_url_path='/')
 
 cors_origin = os.environ.get("CORS_ORIGIN", "http://localhost:3000")
 CORS(app, origins=[cors_origin])
@@ -190,10 +189,8 @@ def chat_gpt():
     if last_call_time and (now - last_call_time).total_seconds() < 30:
         return jsonify({"error": "You can only make a request every 30 seconds."}), 429
     
-    # Your OpenAI API Key
     openai.api_key = api_key
     
-    # Create a detailed prompt here:
     user_message = request.json['query']
     context = "I want you to recommend/suggest publicly traded companies based on the message below. I want you to recommend/suggest multiple companies when relevant or requested and send them in a list, and always with the companies tickers following their respective names in parenthesis. The context is that the user is looking for suggestions of industries and/or companies to research further for possible investment purposes. This is the user message:"
     
@@ -226,7 +223,7 @@ def generate_excel():
     stocks = data['stocks']
     target_percentages = data['targetPercentages']
     current_shares = data['currentShares']
-    current_prices = data['currentPrices']  # Assuming you are sending this data
+    current_prices = data['currentPrices']
     shares_to_buy = data['sharesToBuy']
     surplus = data['surplus']
     fee = data['fee']
@@ -293,7 +290,7 @@ def generate_excel():
     # Apply styles
     ws.cell(row=3, column=7).fill = orange_fill
     ws.cell(row=3, column=8).fill = orange_fill
-    ws.cell(row=4, column=7).fill = red_fill # change this to instead hide the text (len(stocks))
+    ws.cell(row=4, column=7).fill = red_fill # todo: change this to instead hide the text (len(stocks))
 
     for i in range(3, len(stocks) + 3):
         ws.cell(row=i, column=5).fill = orange_fill
@@ -357,14 +354,14 @@ def generate_excel():
         month_name = datetime(1900, (current_month + period - 1) % 12 + 1, 1).strftime('%B')
         cell = ws.cell(row=row_offset, column=1)
         cell.value = f"Month {period} ({month_name})"
-        for col in range(1, 9):  # This will fill cells from A to H
+        for col in range(1, 9):  # Columns A to H
             cell = ws.cell(row=row_offset, column=col)
             cell.fill = header_fill
             cell.font = bold_orange_font
         row_offset += 1
 
         # Insert headers for the period
-        for col in range(1, 9):  # This will fill cells from A to H
+        for col in range(1, 9):  # Columns A to H
             cell = ws.cell(row=row_offset, column=col)
             cell.fill = header_fill
             cell.font = bold_white_font
@@ -378,12 +375,12 @@ def generate_excel():
         for i, stock in enumerate(stocks, start=row_offset):
             ws.cell(row=i, column=1).value = stock
             ws.cell(row=i, column=2).value = f'=INDEX(CalculateSharesToBuy({stocks_range}, {weights_range}, {prices_range}, {current_shares_range}, {surplus}, {fee}), {i-row_offset+1})'
-            for col in range(1, 9):  # This will fill cells from A to H
+            for col in range(1, 9):  # Columns A to H
                 cell = ws.cell(row=i, column=col)
                 cell.fill = light_fill
                 cell.font = white_font
     
-        row_offset += len(stocks) + 0 # adjust?
+        row_offset += len(stocks) + 0
         for col in range(1, 9):  # Columns A to H
             ws.cell(row=row_offset, column=col).fill = dark_fill
         row_offset += 1
